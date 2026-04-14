@@ -84,21 +84,57 @@ cd koopcare-admin
 
 ## 🤝 Panduan Kolaborasi Git (Team Workflow)
 
-Agar tidak terjadi error `non-fast-forward` atau konflik yang merusak kode, seluruh anggota tim **WAJIB** mengikuti alur kerja berikut:
+Untuk mencegah bentrok kode dan error (*conflict/non-fast-forward*), seluruh anggota tim **WAJIB** mengikuti SOP *Feature Branch Workflow* berikut. **Dilarang keras ngoding langsung di branch `main`!**
 
-### 1. Alur Kerja Harian (The Golden Rule)
-Sebelum mulai mengetik kode apa pun setiap hari, pastikan lokal Anda sinkron dengan server:
+### Fase 1: Memulai Tugas Baru (Routine Harian)
+Selalu mulai dari branch `main` yang paling baru sebelum membuat branch tugas.
 ```bash
+git checkout main
+git pull origin main
+# Buat branch baru khusus untuk fitur/bug yang dikerjakan
+git checkout -b feature/nama-halaman-atau-fitur
+```
+
+### Fase 2: Proses Pengembangan (Ngoding)
+Lakukan pekerjaan Anda dan simpan secara berkala.
+```bash
+git add .
+git commit -m "feat: deskripsi pekerjaan menggunakan standar konvensi"
+```
+
+### Fase 3: Sinkronisasi (Wajib Sebelum Mengirim)
+Pastikan kode Anda tidak menabrak pembaruan dari tim lain yang sudah masuk ke `main` lebih dulu.
+```bash
+# Pastikan Anda sedang berada di branch fitur Anda, lalu tarik dari main
 git pull origin main
 ```
-*Lakukan ini secara berkala, terutama setelah rekan tim mengabarkan mereka baru saja melakukan push.*
+*Jika muncul peringatan CONFLICT, buka VS Code, selesaikan bentrok pada file yang ditandai, lalu `git add .` dan `git commit` kembali.*
 
-### 2. Prosedur Push yang Aman
-Jika Kita ingin mengirim perubahan, ikuti urutan ini:
-1. **Simpan Pekerjaan:** `git add .` dan `git commit -m "feat: deskripsi singkat"`
-2. **Tarik Perubahan Terbaru:** `git pull origin main`
-3. **Selesaikan Konflik (Jika ada):** Jika muncul tulisan *Conflict*, buka file tersebut, pilih kode yang benar, lalu `git add .` dan `git commit`.
-4. **Kirim:** `git push origin main`
+### Fase 4: Mengirim Kode & Pull Request
+Kirim branch Anda dan gabungkan melalui web GitHub, BUKAN di terminal.
+```bash
+git push origin feature/nama-halaman-atau-fitur
+```
+1. Buka repositori GitHub.
+2. Klik tombol **"Compare & pull request"**.
+3. Minta *Review* dari rekan tim.
+4. Jika disetujui (Approve), klik **"Merge pull request"** di GitHub.
+
+### Fase 5: Pembersihan (Cleanup)
+Setelah sukses digabungkan di GitHub, bersihkan lokal Anda.
+```bash
+git checkout main
+git pull origin main
+git branch -d feature/nama-halaman-atau-fitur  # Opsional: Hapus branch lama
+```
+
+---
+
+## 🛡️ Aturan Pengaman Repositori (Branch Protection)
+Pemilik repositori harus mengaktifkan *Branch Protection Rules* di GitHub Settings:
+* Kunci branch `main`.
+* Centang **"Require a pull request before merging"**.
+* Hal ini mencegah *push* langsung ke `main` secara tidak sengaja.
 
 ---
 
@@ -108,14 +144,9 @@ Jika Kita ingin mengirim perubahan, ikuti urutan ini:
 **Penyebab:** Ada kode baru di GitHub yang belum Anda tarik ke laptop.
 **Solusi Rapi:**
 ```bash
-# 1. Atur strategi merge
 git config pull.rebase false
-
-# 2. Tarik dan gabungkan otomatis
 git pull origin main
-
-# 3. Jika aman, langsung push
-git push origin main
+git push origin <nama-branch-anda>
 ```
 
 ### B. Error: `divergent branches`
@@ -129,26 +160,16 @@ git pull origin main --allow-unrelated-histories
 
 ## 🚫 Yang HARUS Dihindari (Best Practices)
 
-1. **Dilarang keras menggunakan `--force`:** Jangan pernah menjalankan `git push --force` di branch utama (`main`). Ini akan **menghapus** hasil kerja rekan tim di GitHub secara permanen.
-   
-2. **Jangan Mengedit File Langsung di Web GitHub:** Hindari menekan tombol "Edit" di browser GitHub. Ini adalah penyebab utama error `non-fast-forward`. Selalu edit di VS Code/Laptop Anda.
-
-3. **Jangan Commit Folder `node_modules`:** Pastikan folder ini ada di `.gitignore`. Men-commit ribuan file library akan membuat proses `pull/push` menjadi sangat lambat dan berat.
-
-4. **Pesan Commit yang Jelas:** Gunakan awalan (prefix) agar rekan tim mudah membaca riwayat:
-   - `feat:` untuk fitur baru.
-   - `fix:` untuk perbaikan bug.
-   - `style:` untuk perubahan tampilan/CSS.
-   - `docs:` untuk perubahan README atau dokumentasi.
+1. **Dilarang menggunakan `--force`:** Jangan pernah menjalankan `git push --force`. Ini akan **menghapus** hasil kerja tim secara permanen.
+2. **Jangan Mengedit File di Web GitHub:** Hindari menekan tombol "Edit" di browser GitHub. Selalu edit di VS Code.
+3. **Jangan Commit `node_modules` atau `.env`:** Pastikan file ini ada di `.gitignore`.
 
 ---
 
 ## 🐳 Tips Docker untuk Tim
-Jika rekan tim menambahkan library baru (misal: menginstall `lucide-react`), maka saat melakukan `pull`, harus menjalankan:
+Jika rekan tim menambahkan library baru, maka setelah melakukan `pull`, Anda harus menjalankan:
 ```bash
 docker-compose up --build
 ```
-*Ini untuk memastikan container Docker menginstall library baru tersebut secara otomatis.*
-
----
-
+*Ini memastikan container Docker menginstall library baru tersebut secara otomatis.*
+```
