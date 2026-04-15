@@ -12,7 +12,7 @@ Silakan isi baris yang kosong di bawah ini dengan nama Anda dan pesan konfirmasi
 1. [Ahmad Fauzi] - "Sistem utama berhasil diinisialisasi. Latihan Git dimulai!"
 2. [Safitrah Salam] - "[telah mengisi daftar kehadiran]"
 3. [Rafi] - "Berhasil mengubah kode oleh rafi"
-4. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"
+4. [Wira Selfina Laydi] - "[sudah berhasil]"
 5. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"
 
 ---
