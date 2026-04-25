@@ -23,12 +23,32 @@
 @layer components {
   /* Input Form (Sudah dipakai di Login/Register) */
   .koopcare-input {
-    @apply block w-full py-2.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm;
+    @apply block w-full py-3 px-4 border border-gray-300 rounded-3xl focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm bg-white;
+  }
+
+  .koopcare-input-invalid {
+    @apply border-red-300 focus:ring-red-200 focus:border-red-500;
   }
   
   /* Tombol Utama */
   .koopcare-button-primary {
-    @apply w-full bg-secondary text-dark font-bold py-3 px-4 rounded-lg hover:bg-yellow-500 transition duration-200 text-sm shadow-sm;
+    @apply w-full bg-secondary text-dark font-bold py-3 px-4 rounded-full hover:bg-yellow-500 transition duration-200 text-sm shadow-sm shadow-yellow-200/40;
+  }
+
+  .auth-card {
+    @apply bg-white rounded-[32px] shadow-[0_30px_80px_rgba(15,23,42,0.08)] border border-gray-100 p-8;
+  }
+
+  .auth-tab {
+    @apply text-sm text-gray-500 pb-3 border-b-2 border-transparent transition-all duration-200;
+  }
+
+  .auth-tab-active {
+    @apply text-dark border-secondary font-semibold;
+  }
+
+  .field-error {
+    @apply mt-2 text-xs text-red-600;
   }
 
   /* Kartu (Card) untuk Dashboard */
@@ -38,7 +58,7 @@
 
   /* Menu Sidebar */
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200;
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200;
   }
   .sidebar-link-active {
     @apply bg-primary text-white shadow-md;

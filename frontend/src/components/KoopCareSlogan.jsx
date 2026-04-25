@@ -1,4 +1,3 @@
-// frontend/src/components/KoopCareSlogan.jsx
 import React from 'react';
 import { Shovel, ShieldCheck, TimerReset, Users } from 'lucide-react';
 
@@ -6,7 +5,7 @@ const KoopCareSlogan = () => {
   return (
     <div className="md:w-1/2 bg-primary text-white flex items-center justify-center p-8 md:p-12">
       <div className="max-w-md w-full">
-        {/* Logo dan Nama */}
+        {}
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3.5 bg-secondary/20 rounded-xl">
             <Shovel className="h-9 w-9 text-secondary" />

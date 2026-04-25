@@ -8,20 +8,22 @@ import KYC from './pages/KYC/KYC';
 import Loans from './pages/Loan/Loans';
 import Cashier from './pages/Cashier/Cashier';
 import Ledger from './pages/Ledger/Ledger';
+import AdminSettings from './pages/Admin/AdminSettings';
 
 import { ProtectedRoute, PublicRoute, MainLayout } from './AuthComponents';
+import ToastContainer from './components/Toast/ToastContainer';
 
 function App() {
   return (
     <Router>
+      <ToastContainer />
       <Routes>
-        {}
+
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -29,12 +31,14 @@ function App() {
             <Route path="/loans" element={<Loans />} />
             <Route path="/cashier" element={<Cashier />} />
             <Route path="/ledger" element={<Ledger />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
         </Route>
 
-        {}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {/* Fallback */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
     </Router>
   );

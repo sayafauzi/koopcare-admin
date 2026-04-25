@@ -10,7 +10,7 @@ Di sini kita akan berlatih membuat Branch, melakukan Commit, Push, dan Pull Requ
 Silakan isi baris yang kosong di bawah ini dengan nama Anda dan pesan konfirmasi sesuai instruksi di grup!
 
 1. [Ahmad Fauzi] - "Sistem utama berhasil diinisialisasi. Latihan Git dimulai!"
-2. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"
+2. [Wira Selfina Laydi] - "sistem berhasil di pull"
 3. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"
 4. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"
 5. [Tulis Nama Anda Di Sini] - "[Tulis Pesan Latihan Anda Di Sini]"

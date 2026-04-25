@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import EmptyState from '../../components/EmptyState/EmptyState';
+import SkeletonLoader from '../../components/SkeletonLoader/SkeletonLoader';
+import usePageLoading from '../../hooks/usePageLoading';
 import { Search, Eye, CheckCircle, XCircle } from 'lucide-react';
 
 const KYC = () => {
+  const [kycData] = useState([]);
+  const isLoading = usePageLoading(800);
+
   return (
     <AdminLayout>
       <div className="mb-8">
@@ -10,6 +16,9 @@ const KYC = () => {
         <p className="text-gray-500 text-sm">Tinjau dan verifikasi dokumen identitas anggota baru.</p>
       </div>
 
+      {isLoading ? (
+        <SkeletonLoader type="table" rows={5} />
+      ) : (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-800">Menunggu Verifikasi</h2>
@@ -19,7 +28,14 @@ const KYC = () => {
           </div>
         </div>
         
-        <table className="w-full text-left border-collapse">
+        {kycData.length === 0 ? (
+          <EmptyState 
+            title="Belum Ada Pengajuan KYC" 
+            description="Pengajuan verifikasi identitas anggota akan muncul di sini."
+            icon="users"
+          />
+        ) : (
+          <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
               <th className="p-4 font-semibold border-b">Nama Anggota</th>
@@ -46,8 +62,10 @@ const KYC = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        )}
       </div>
+      )}
     </AdminLayout>
   );
 };
