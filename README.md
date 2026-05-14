@@ -22,6 +22,61 @@
 
 ---
 
+## Integrasi ML API KoopCare
+
+Repo ini tetap memakai arsitektur utama:
+
+```text
+Mobile / Web Admin -> Express Backend -> MySQL
+Express Backend -> FastAPI ML Inference API
+```
+
+Artinya, mobile dan web admin tidak perlu memanggil service ML secara langsung. Mobile dan web admin cukup memanggil backend Express melalui `VITE_API_URL` atau base URL backend yang nanti disepakati tim. Backend Express yang bertanggung jawab memanggil service ML melalui `ML_API_BASE_URL`.
+
+Environment backend yang perlu disiapkan:
+
+```env
+ML_API_BASE_URL=http://127.0.0.1:8000
+ML_API_TIMEOUT_MS=5000
+```
+
+Jika backend dijalankan langsung dari terminal laptop, `ML_API_BASE_URL=http://127.0.0.1:8000` sudah tepat. Jika backend dijalankan lewat Docker Compose sementara service ML berjalan di laptop host, gunakan:
+
+```env
+ML_API_BASE_URL=http://host.docker.internal:8000
+```
+
+Pada local development, jalankan service ML inference terlebih dahulu dari repo MLOps:
+
+```bash
+uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Lalu jalankan backend admin seperti biasa. Backend akan memakai helper di:
+
+```text
+backend/src/services/mlScoringClient.js
+backend/src/services/loanAiMappingService.js
+backend/src/services/loanMlScoringService.js
+```
+
+Catatan penting untuk loan scoring:
+
+```text
+prob_default dari ML API = semakin tinggi berarti semakin berisiko gagal bayar.
+ai_score di admin = semakin tinggi berarti semakin layak.
+```
+
+Jangan mengisi `ai_score` dengan `prob_default * 100` karena maknanya akan terbalik. Jika UI atau database membutuhkan skor kelayakan 0-100, gunakan:
+
+```text
+eligibility_score = round((1 - prob_default) * 100)
+```
+
+Untuk fase saat ini, integrasi tetap memakai Express Backend + MySQL. Tidak ada migrasi ke Supabase pada fase ini, dan model XGBoost dari repo MLOps dipakai sebagai artifact integrasi sementara sampai ada keputusan retraining berikutnya.
+
+---
+
 ## 📐 Standar Penulisan Kode (Coding Conventions)
 
 Untuk menjaga kualitas dan keterbacaan kode (*clean code*) bagi seluruh tim pengembang, proyek ini menerapkan aturan standar penulisan sebagai berikut:
@@ -172,4 +227,3 @@ Jika rekan tim menambahkan library baru, maka setelah melakukan `pull`, Anda har
 docker-compose up --build
 ```
 *Ini memastikan container Docker menginstall library baru tersebut secara otomatis.*
-```

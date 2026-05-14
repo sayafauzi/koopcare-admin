@@ -37,6 +37,8 @@ services:
       - DB_NAME=koopcare_db
       - JWT_SECRET=supersecretkoopcarekey
       - NODE_ENV=development
+      - ML_API_BASE_URL=http://host.docker.internal:8000
+      - ML_API_TIMEOUT_MS=5000
     depends_on:
       db:
         condition: service_healthy
