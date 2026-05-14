@@ -46,6 +46,14 @@ Jika backend dijalankan langsung dari terminal laptop, `ML_API_BASE_URL=http://1
 ML_API_BASE_URL=http://host.docker.internal:8000
 ```
 
+Jika port MySQL `3306` di laptop sudah dipakai oleh MySQL/XAMPP/Laragon lokal, buat file `.env` di root repo ini dan isi:
+
+```env
+MYSQL_HOST_PORT=3307
+```
+
+Dengan begitu MySQL container tetap memakai port `3306` di dalam container, tetapi dari laptop bisa diakses lewat port `3307`.
+
 Pada local development, jalankan service ML inference terlebih dahulu dari repo MLOps:
 
 ```bash

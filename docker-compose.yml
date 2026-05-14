@@ -12,7 +12,7 @@ services:
       MYSQL_USER: koopcare_user
       MYSQL_PASSWORD: koopcarepassword
     ports:
-      - "3306:3306"
+      - "${MYSQL_HOST_PORT:-3306}:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
