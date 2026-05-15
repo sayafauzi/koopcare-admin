@@ -1,5 +1,7 @@
 const DEFAULT_ML_API_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_ML_API_TIMEOUT_MS = 5000;
+const READY_ARTIFACT_STATUS = 'available';
+const READY_METADATA_SOURCE = 'artifact';
 
 export class MlApiError extends Error {
   constructor(message, { status = null, code = 'ml_api_error', detail = null } = {}) {
@@ -116,8 +118,16 @@ export const getModelInfo = (options = {}) => {
 
 export const assertModelReady = async (options = {}) => {
   const modelInfo = await getModelInfo(options);
+  const modelLoaded = modelInfo?.model_loaded === true;
+  const artifactAvailable = modelInfo?.artifact_status === READY_ARTIFACT_STATUS;
+  const metadataFromArtifact = modelInfo?.metadata_source === READY_METADATA_SOURCE;
 
-  if (modelInfo?.model_loaded !== true || modelInfo?.artifact_error) {
+  if (
+    !modelLoaded
+    || modelInfo?.artifact_error
+    || !artifactAvailable
+    || !metadataFromArtifact
+  ) {
     throw new MlApiError('ML model is not ready for prediction.', {
       code: 'ml_model_not_ready',
       detail: modelInfo,

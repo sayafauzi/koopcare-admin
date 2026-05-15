@@ -68,6 +68,13 @@ backend/src/services/loanAiMappingService.js
 backend/src/services/loanMlScoringService.js
 ```
 
+Untuk memverifikasi helper integrasi ML tanpa menjalankan database atau web admin:
+
+```bash
+cd backend
+npm test
+```
+
 Catatan penting untuk loan scoring:
 
 ```text
