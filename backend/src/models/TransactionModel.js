@@ -36,6 +36,10 @@ export const getByMember = async (memberId) => {
   return rows;
 };
 
+export const findByMemberId = async (memberId) => {
+    const [rows] = await pool.query('SELECT * FROM transactions WHERE member_id = ? ORDER BY created_at DESC', [memberId]);
+    return rows;
+};
 
 export const findAllWithFilters = async (filters, limit, offset) => {
   const { startDate, endDate, type, memberId } = filters;

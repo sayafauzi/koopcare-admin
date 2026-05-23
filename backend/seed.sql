@@ -24,10 +24,11 @@ INSERT INTO kyc_submissions (member_id, full_name, nik, phone, status, ktp_photo
 (1, 'Ahmad Fauzi (keempat)', '3201234567890126', '+628123456788', 'PENDING', 'https://placehold.co/400x300?text=KTP_Fauzi4', 'https://placehold.co/400x300?text=Selfie_Fauzi4', NULL, NULL, NULL);
 
 -- Masukkan data contoh loans
-INSERT INTO loans (member_id, request_number, amount, tenor, type, status, ai_score) VALUES
-(1, 'LOAN001', 5000000, 6, 'MURABAHAH', 'PENDING', 87),
-(2, 'LOAN002', 2000000, 3, 'QARDHUL_HASAN', 'PENDING', 65),
-(3, 'LOAN003', 7500000, 12, 'MURABAHAH', 'PENDING', 92);
+INSERT INTO loans (member_id, request_number, amount, tenor, type, status, ai_score, ai_recommendation, prob_default, risk_level, max_approved_amount)
+VALUES
+    (2, 'LOAN001', 5000000, 6, 'MURABAHAH', 'PENDING', 87, 'LAYAK', 0.13, 'low', 4000000),
+    (3, 'LOAN002', 2000000, 3, 'QARDHUL_HASAN', 'PENDING', 65, 'TIDAK_LAYAK', 0.45, 'medium', 1000000),
+    (4, 'LOAN003', 7500000, 12, 'MURABAHAH', 'PENDING', 92, 'LAYAK', 0.08, 'low', 6000000);
 
 -- Masukkan data transactions
 INSERT IGNORE INTO transactions (member_id, type, amount, description, created_at) VALUES
