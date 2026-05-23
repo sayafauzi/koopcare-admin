@@ -8,6 +8,7 @@ import ledgerRoutes from './v1/ledgerRoutes.js';
 import dashboardRoutes from './v1/dashboardRoutes.js';
 import adminRoutes from './v1/adminRoutes.js';
 import publicRoutes from './v1/publicRoutes.js';
+import mobileRoutes from './v1/mobileRoutes.js';
 
 const router = Router();
 router.use('/public', publicRoutes);
@@ -19,5 +20,6 @@ router.use('/kyc', kycRoutes);
 router.use('/loans', loanRoutes);
 router.use('/cashier', cashierRoutes);
 router.use('/ledger', ledgerRoutes);
+router.use('/mobile', mobileRoutes);
 
 export default router;

@@ -36,6 +36,29 @@ export const findById = async (id) => {
   return rows[0];
 };
 
+export const findByMemberId = async (memberId) => {
+    const [rows] = await pool.query('SELECT * FROM kyc_submissions WHERE member_id = ? ORDER BY created_at DESC LIMIT 1', [memberId]);
+    return rows[0];
+};
+
+export const findPendingByMemberId = async (memberId) => {
+    const [rows] = await pool.query(
+        'SELECT * FROM kyc_submissions WHERE member_id = ? AND status = "PENDING"',
+        [memberId]
+    );
+    return rows[0];
+};
+
+export const create = async (data) => {
+  const { member_id, full_name, nik, phone, status, ktp_photo_url, selfie_photo_url } = data;
+  const [result] = await pool.query(
+    `INSERT INTO kyc_submissions (member_id, full_name, nik, phone, status, ktp_photo_url, selfie_photo_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [member_id, full_name, nik, phone, status, ktp_photo_url, selfie_photo_url]
+  );
+  return result.insertId;
+};
+
 export const updateStatus = async (id, status, reviewedBy, notes = null) => {
   await pool.query(`
     UPDATE kyc_submissions

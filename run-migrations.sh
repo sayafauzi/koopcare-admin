@@ -9,7 +9,7 @@ docker exec -i $DB_CONTAINER mysql -u$DB_USER -p$DB_PASS -e "CREATE DATABASE IF 
 
 echo "⏳ Menjalankan migration..."
 
-for file in backend/db/migrations/00*.sql; do
+for file in backend/db/migrations/*.sql; do
   echo "   -> $(basename "$file")"
   docker exec -i $DB_CONTAINER mysql -u$DB_USER -p$DB_PASS $DB_NAME < "$file"
   if [ $? -ne 0 ]; then

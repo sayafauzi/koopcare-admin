@@ -67,7 +67,7 @@ const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
           </div>
 
           {/* AI Scoring */}
-          <div className={`p-3 rounded-lg border ${isEligible ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          {/* <div className={`p-3 rounded-lg border ${isEligible ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
             <div className="flex items-center gap-2">
               {isEligible ? <CheckCircleIcon className="h-5 w-5 text-green-600" /> : <XCircleIcon className="h-5 w-5 text-red-600" />}
               <span className={`font-semibold ${isEligible ? 'text-green-700' : 'text-red-700'}`}>
@@ -76,7 +76,27 @@ const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
               <span className="text-xs text-neutral-500">(Skor: {loan.ai_score}%)</span>
             </div>
             <p className="text-sm text-neutral-600 mt-1">Maksimal disetujui: <span className="font-medium">{formatCurrency(loan.max_approved_amount || loan.amount * 0.8)}</span></p>
-          </div>
+          </div> */}
+
+          {/* Rekomendasi AI */}
+          {loan.ai_recommendation && (
+              <div className={`p-3 rounded-lg border ${loan.ai_recommendation === 'LAYAK' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <div className="flex items-center gap-2">
+                      {loan.ai_recommendation === 'LAYAK' ? (
+                          <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                      ) : (
+                          <XCircleIcon className="h-5 w-5 text-red-600" />
+                      )}
+                      <span className="font-semibold">Rekomendasi AI: {loan.ai_recommendation}</span>
+                      {loan.prob_default && (
+                          <span className="text-xs text-neutral-500">
+                              (Probabilitas gagal bayar: {(loan.prob_default * 100).toFixed(1)}%)
+                          </span>
+                      )}
+                  </div>
+                  <p className="text-xs text-neutral-600 mt-1">*Keputusan akhir tetap di tangan admin.</p>
+              </div>
+          )}
 
           {/* Aksi */}
           {loan.status === 'PENDING' ? (

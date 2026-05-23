@@ -39,6 +39,17 @@ export const findById = async (id) => {
   return rows[0];
 };
 
+export const update = async (id, data) => {
+    const fields = [];
+    const values = [];
+    for (const [key, value] of Object.entries(data)) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+    }
+    values.push(id);
+    await pool.query(`UPDATE members SET ${fields.join(', ')} WHERE id = ?`, values);
+};
+
 export const updatePin = async (id, hashedPin) => {
   await pool.query('UPDATE members SET pin = ? WHERE id = ?', [hashedPin, id]);
 };
@@ -68,10 +79,30 @@ export const findByNIK = async (nik) => {
 };
 
 export const createMember = async (memberData) => {
-  const { fullName, nik, phone, email, pin, status, role } = memberData;
+  const {
+    fullName, nik, phone, email, pin, status, role,
+    monthly_income, tenure_months, existing_loan_balance, has_collateral,
+    code_gender, birth_date, education, family_status, occupation,
+    own_car, own_realty, children_count, family_members,
+    employed_days, last_phone_change_days
+  } = memberData;
+
   const [result] = await pool.query(
-    'INSERT INTO members (full_name, nik, phone, email, pin, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [fullName, nik, phone, email, pin, status, role || 'member']
+    `INSERT INTO members (
+      full_name, nik, phone, email, pin, status, role,
+      monthly_income, tenure_months, existing_loan_balance, has_collateral,
+      code_gender, birth_date, education, family_status, occupation,
+      own_car, own_realty, children_count, family_members,
+      employed_days, last_phone_change_days
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      fullName, nik, phone, email, pin, status, role || 'member',
+      monthly_income || 0, tenure_months || 0, existing_loan_balance || 0, has_collateral || false,
+      code_gender || 'M', birth_date || null, education || 'Secondary / secondary special',
+      family_status || 'Single', occupation || 'Laborers',
+      own_car || false, own_realty || false, children_count || 0, family_members || 1,
+      employed_days || -1825, last_phone_change_days || -180
+    ]
   );
   return result.insertId;
 };
