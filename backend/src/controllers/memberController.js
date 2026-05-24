@@ -1,6 +1,7 @@
 // backend/src/controllers/memberController.js
 import * as memberModel from '../models/MemberModel.js';
 import { generateRandomPin, hashPin } from '../services/pinService.js';
+import { sendOTP } from '../services/whatsappService.js';
 
 export const getMembers = async (req, res, next) => {
   try {
@@ -30,19 +31,33 @@ export const getMemberById = async (req, res, next) => {
   }
 };
 
+// export const resetMemberPin = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const member = await memberModel.findById(id);
+//     if (!member) return res.status(404).json({ error: 'Anggota tidak ditemukan' });
+//     const newPin = generateRandomPin();
+//     const hashedPin = await hashPin(newPin);
+//     await memberModel.updatePin(id, hashedPin);
+//     // TODO: Kirim PIN via WhatsApp (akan diintegrasi nanti)
+//     res.json({ success: true, message: 'PIN berhasil direset', newPin });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const resetMemberPin = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const member = await memberModel.findById(id);
-    if (!member) return res.status(404).json({ error: 'Anggota tidak ditemukan' });
-    const newPin = generateRandomPin();
-    const hashedPin = await hashPin(newPin);
-    await memberModel.updatePin(id, hashedPin);
-    // TODO: Kirim PIN via WhatsApp (akan diintegrasi nanti)
-    res.json({ success: true, message: 'PIN berhasil direset', newPin });
-  } catch (err) {
-    next(err);
-  }
+    try {
+        const { id } = req.params;
+        const member = await memberModel.findById(id);
+        if (!member) return res.status(404).json({ error: 'Anggota tidak ditemukan' });
+        const newPin = generateRandomPin();
+        const hashedPin = await hashPin(newPin);
+        await memberModel.updatePin(id, hashedPin);
+        // Kirim PIN via WhatsApp
+        await sendOTP(member.phone, `PIN baru Anda: ${newPin}`);
+        res.json({ success: true, message: 'PIN berhasil direset', newPin });
+    } catch (err) { next(err); }
 };
 
 export const toggleMemberStatus = async (req, res, next) => {

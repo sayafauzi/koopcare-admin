@@ -23,5 +23,6 @@ router.get('/loans/:id', mobileController.getLoanDetailMember);
 router.get('/transactions', mobileController.getMemberTransactions);
 router.get('/notifications', mobileController.getNotifications);
 router.patch('/notifications/:id/read', mobileController.markNotificationRead);
+router.patch('/notifications/read-all', mobileController.markAllNotificationsRead);
 
 export default router;

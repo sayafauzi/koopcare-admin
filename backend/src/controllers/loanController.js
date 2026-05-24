@@ -3,6 +3,7 @@ import * as loanService from '../services/loanService.js';
 import * as loanModel from '../models/LoanModel.js';
 import * as MemberModel from '../models/MemberModel.js';
 import { getAIRecommendation } from '../services/aiScoringService.js';
+import * as notificationModel from '../models/NotificationModel.js';
 
 export const getLoans = async (req, res, next) => {
   try {
@@ -28,29 +29,51 @@ export const getLoanDetail = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// export const approveLoan = async (req, res, next) => {
+//   try {
+//     const { approvedAmount, approvedTenor } = req.body;
+//     if (!approvedAmount || approvedAmount <= 0) throw new Error('Jumlah yang disetujui harus diisi');
+//     if (!approvedTenor || approvedTenor <= 0) throw new Error('Tenor harus diisi');
+//     const reviewerId = req.user?.id || 1;
+//     await loanService.approveLoan(req.params.id, reviewerId, approvedAmount, approvedTenor);
+//     res.json({ success: true, message: 'Pinjaman disetujui' });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+// export const rejectLoan = async (req, res, next) => {
+//   try {
+//     const { reason } = req.body;
+//     if (!reason) throw new Error('Alasan penolakan harus diisi');
+//     const reviewerId = req.user?.id || 1;
+//     await loanService.rejectLoan(req.params.id, reviewerId, reason);
+//     res.json({ success: true, message: 'Pinjaman ditolak' });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const approveLoan = async (req, res, next) => {
-  try {
-    const { approvedAmount, approvedTenor } = req.body;
-    if (!approvedAmount || approvedAmount <= 0) throw new Error('Jumlah yang disetujui harus diisi');
-    if (!approvedTenor || approvedTenor <= 0) throw new Error('Tenor harus diisi');
-    const reviewerId = req.user?.id || 1;
-    await loanService.approveLoan(req.params.id, reviewerId, approvedAmount, approvedTenor);
-    res.json({ success: true, message: 'Pinjaman disetujui' });
-  } catch (err) {
-    next(err);
-  }
+    try {
+        const { approvedAmount, approvedTenor } = req.body;
+        const reviewerId = req.user?.id || 1;
+        const loan = await loanModel.findById(req.params.id);
+        await loanService.approveLoan(req.params.id, reviewerId, approvedAmount, approvedTenor);
+        await notificationModel.create(loan.member_id, 'Pinjaman Disetujui', `Pinjaman Anda sebesar Rp${approvedAmount.toLocaleString()} telah disetujui.`);
+        res.json({ success: true, message: 'Pinjaman disetujui' });
+    } catch (err) { next(err); }
 };
 
 export const rejectLoan = async (req, res, next) => {
-  try {
-    const { reason } = req.body;
-    if (!reason) throw new Error('Alasan penolakan harus diisi');
-    const reviewerId = req.user?.id || 1;
-    await loanService.rejectLoan(req.params.id, reviewerId, reason);
-    res.json({ success: true, message: 'Pinjaman ditolak' });
-  } catch (err) {
-    next(err);
-  }
+    try {
+        const { reason } = req.body;
+        const reviewerId = req.user?.id || 1;
+        const loan = await loanModel.findById(req.params.id);
+        await loanService.rejectLoan(req.params.id, reviewerId, reason);
+        await notificationModel.create(loan.member_id, 'Pinjaman Ditolak', `Pengajuan pinjaman ditolak. Alasan: ${reason}`);
+        res.json({ success: true, message: 'Pinjaman ditolak' });
+    } catch (err) { next(err); }
 };
 
 export const createLoan = async (req, res, next) => {

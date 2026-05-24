@@ -1,4 +1,5 @@
 import * as kycService from '../services/kycService.js';
+import * as notificationModel from '../models/NotificationModel.js';
 
 export const getKycList = async (req, res, next) => {
   try {
@@ -30,24 +31,46 @@ export const getKycDetail = async (req, res, next) => {
   }
 };
 
+// export const approveKyc = async (req, res, next) => {
+//   try {
+//     // Jika req.user tidak ada, gunakan ID admin default (misal 1)
+//     const reviewerId = req.user?.id || 1;
+//     await kycService.approveKycSubmission(req.params.id, reviewerId);
+//     res.json({ success: true, message: 'KYC disetujui' });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+// export const rejectKyc = async (req, res, next) => {
+//   try {
+//     const { notes } = req.body;
+//     const reviewerId = req.user?.id || 1; // fallback
+//     await kycService.rejectKycSubmission(req.params.id, reviewerId, notes);
+//     res.json({ success: true, message: 'KYC ditolak' });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const approveKyc = async (req, res, next) => {
-  try {
-    // Jika req.user tidak ada, gunakan ID admin default (misal 1)
-    const reviewerId = req.user?.id || 1;
-    await kycService.approveKycSubmission(req.params.id, reviewerId);
-    res.json({ success: true, message: 'KYC disetujui' });
-  } catch (err) {
-    next(err);
-  }
+    try {
+        const reviewerId = req.user?.id || 1;
+        const submission = await kycService.getKycDetail(req.params.id); // ambil member_id
+        await kycService.approveKycSubmission(req.params.id, reviewerId);
+        // Kirim notifikasi ke anggota
+        await notificationModel.create(submission.member_id, 'KYC Disetujui', 'Pengajuan KYC Anda telah disetujui. Sekarang Anda dapat mengajukan pinjaman.');
+        res.json({ success: true, message: 'KYC disetujui' });
+    } catch (err) { next(err); }
 };
 
 export const rejectKyc = async (req, res, next) => {
-  try {
-    const { notes } = req.body;
-    const reviewerId = req.user?.id || 1; // fallback
-    await kycService.rejectKycSubmission(req.params.id, reviewerId, notes);
-    res.json({ success: true, message: 'KYC ditolak' });
-  } catch (err) {
-    next(err);
-  }
+    try {
+        const { notes } = req.body;
+        const reviewerId = req.user?.id || 1;
+        const submission = await kycService.getKycDetail(req.params.id);
+        await kycService.rejectKycSubmission(req.params.id, reviewerId, notes);
+        await notificationModel.create(submission.member_id, 'KYC Ditolak', `Pengajuan KYC ditolak. Alasan: ${notes || 'Tidak memenuhi syarat'}`);
+        res.json({ success: true, message: 'KYC ditolak' });
+    } catch (err) { next(err); }
 };

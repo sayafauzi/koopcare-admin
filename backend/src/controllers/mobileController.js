@@ -2,7 +2,9 @@ import * as MemberModel from '../models/MemberModel.js';
 import * as KycModel from '../models/KycModel.js';
 import * as LoanModel from '../models/LoanModel.js';
 import * as TransactionModel from '../models/TransactionModel.js';
-import * as NotificationModel from '../models/NotificationModel.js'; // nanti dibuat
+import * as NotificationModel from '../models/NotificationModel.js';
+import { sendOTP } from '../services/whatsappService.js';
+import * as notificationModel from '../models/NotificationModel.js';
 import { hashPin, verifyPin, generateRandomPin } from '../services/pinService.js';
 import { getAIRecommendation } from '../services/aiScoringService.js';
 import jwt from 'jsonwebtoken';
@@ -49,19 +51,38 @@ export const registerMember = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+// export const requestOtp = async (req, res, next) => {
+//     try {
+//         const { identifier } = req.body;
+//         if (!identifier) return res.status(400).json({ error: 'Nomor WhatsApp atau email wajib' });
+//         let member = await MemberModel.findByEmail(identifier);
+//         if (!member) member = await MemberModel.findByPhone(identifier);
+//         if (!member) return res.status(404).json({ error: 'Akun tidak ditemukan' });
+//         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//         const expiresAt = Date.now() + 10 * 60 * 1000;
+//         otpStore.set(identifier, { otp, expiresAt });
+//         console.log(`[OTP] untuk ${identifier}: ${otp}`);
+//         // TODO: kirim WhatsApp
+//         res.json({ success: true, message: 'Kode OTP dikirim', otp }); // mynote: Hanya untuk development! hapus bila sudah di production
+//     } catch (err) { next(err); }
+// };
+
 export const requestOtp = async (req, res, next) => {
     try {
         const { identifier } = req.body;
-        if (!identifier) return res.status(400).json({ error: 'Nomor WhatsApp atau email wajib' });
-        let member = await MemberModel.findByEmail(identifier);
-        if (!member) member = await MemberModel.findByPhone(identifier);
-        if (!member) return res.status(404).json({ error: 'Akun tidak ditemukan' });
+        const member = await MemberModel.findByPhone(identifier) || await MemberModel.findByEmail(identifier);
+        if (!member) return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = Date.now() + 10 * 60 * 1000;
         otpStore.set(identifier, { otp, expiresAt });
-        console.log(`[OTP] untuk ${identifier}: ${otp}`);
-        // TODO: kirim WhatsApp
-        res.json({ success: true, message: 'Kode OTP dikirim', otp }); // mynote: Hanya untuk development! hapus bila sudah di production
+
+        // Kirim via WhatsApp
+        const sent = await sendOTP(member.phone, otp);
+        if (!sent) {
+            console.log(`[OTP] Fallback untuk ${identifier}: ${otp}`);
+        }
+        res.json({ success: true, message: 'Kode OTP dikirim via WhatsApp' });
     } catch (err) { next(err); }
 };
 
@@ -244,14 +265,22 @@ export const getMemberTransactions = async (req, res, next) => {
 // ========== Notifikasi ==========
 export const getNotifications = async (req, res, next) => {
     try {
-        const notifications = await NotificationModel.findByMemberId(req.user.id);
+        const notifications = await notificationModel.findByMemberId(req.user.id);
         res.json({ success: true, data: notifications });
     } catch (err) { next(err); }
 };
 
 export const markNotificationRead = async (req, res, next) => {
     try {
-        await NotificationModel.markAsRead(req.params.id, req.user.id);
+        await notificationModel.markAsRead(req.params.id, req.user.id);
+        res.json({ success: true });
+    } catch (err) { next(err); }
+};
+
+// Jika ingin mark all read, buat endpoint terpisah
+export const markAllNotificationsRead = async (req, res, next) => {
+    try {
+        await notificationModel.markAllAsRead(req.user.id);
         res.json({ success: true });
     } catch (err) { next(err); }
 };
