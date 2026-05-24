@@ -2,7 +2,7 @@
 import * as loanService from '../services/loanService.js';
 import * as loanModel from '../models/LoanModel.js';
 import * as MemberModel from '../models/MemberModel.js';
-import { getAIRecommendation } from '../services/aiScoringService.js';
+import { scoreLoanApplication } from '../services/loanMlScoringService.js';
 import * as notificationModel from '../models/NotificationModel.js';
 
 export const getLoans = async (req, res, next) => {
@@ -77,32 +77,28 @@ export const rejectLoan = async (req, res, next) => {
 };
 
 export const createLoan = async (req, res, next) => {
-  try {
-    const { member_id, amount, tenor, purpose, type } = req.body;
-    const request_number = `LOAN${Date.now()}`;
-    const loanId = await loanModel.create({ member_id, request_number, amount, tenor, purpose, type, status: 'PENDING' });
-    const member = await MemberModel.findById(member_id);
-    
-    getAIRecommendation(member, { amount, purpose, tenor }).then(async (aiResult) => {
-      if (aiResult) {
-        const ai_score = aiResult.recommendation === 'LAYAK' ? 80 : 20;
-        const max_approved_amount = aiResult.prob_default ? amount * (1 - aiResult.prob_default) : amount * 0.8;
+    try {
+        const { member_id, amount, tenor, purpose, type } = req.body;
+        const request_number = `LOAN${Date.now()}`;
+        const loanId = await loanModel.create({ member_id, request_number, amount, tenor, purpose, type, status: 'PENDING' });
+        
+        // Panggil AI secara synchronous (await) agar hasil langsung tersimpan
+        const { recommendation, prob_default, ai_score, risk_level } = await scoreLoanApplication(member_id, { amount, tenor, purpose });
+        
+        const max_approved_amount = prob_default ? amount * (1 - prob_default) : amount * 0.8;
         await loanModel.updateAIResult(loanId, {
-          ai_score,
-          ai_recommendation: aiResult.recommendation,
-          prob_default: aiResult.prob_default,
-          risk_level: aiResult.risk_level,
-          max_approved_amount,
+            ai_score,
+            ai_recommendation: recommendation,
+            prob_default,
+            risk_level,
+            max_approved_amount,
         });
-        console.log(`[AI] Loan ${loanId} updated with AI result.`);
-      } else {
-        console.warn(`[AI] No result from AI service for loan ${loanId}.`);
-      }
-    }).catch(err => console.error('[AI] Background error:', err));
-    
-    res.status(201).json({ success: true, loanId });
-  } catch (err) { 
-    next(err); 
-  }
-  
+        console.log(`[AI] Loan ${loanId} updated with ML result.`);
+        
+        res.status(201).json({ success: true, loanId });
+    } catch (err) { 
+        console.error('[AI] Error in createLoan:', err.message);
+        // Tetap return success meskipun AI gagal, agar pinjaman tetap tercatat
+        res.status(201).json({ success: true, loanId, ai_warning: 'AI scoring failed' });
+    }
 };

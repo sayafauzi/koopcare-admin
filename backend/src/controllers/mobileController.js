@@ -6,7 +6,7 @@ import * as NotificationModel from '../models/NotificationModel.js';
 import { sendOTP } from '../services/whatsappService.js';
 import * as notificationModel from '../models/NotificationModel.js';
 import { hashPin, verifyPin, generateRandomPin } from '../services/pinService.js';
-import { getAIRecommendation } from '../services/aiScoringService.js';
+import { scoreLoanApplication } from '../services/loanMlScoringService.js';
 import jwt from 'jsonwebtoken';
 
 // Helper untuk OTP sederhana (simulasi, bisa diganti dengan WhatsApp)
@@ -82,7 +82,8 @@ export const requestOtp = async (req, res, next) => {
         if (!sent) {
             console.log(`[OTP] Fallback untuk ${identifier}: ${otp}`);
         }
-        res.json({ success: true, message: 'Kode OTP dikirim via WhatsApp' });
+        // res.json({ success: true, message: 'Kode OTP dikirim via WhatsApp' });
+        res.json({ success: true, message: 'Kode OTP dikirim', otp });
     } catch (err) { next(err); }
 };
 
@@ -228,21 +229,22 @@ export const applyLoan = async (req, res, next) => {
             type,
             status: 'PENDING'
         });
-        // Panggil AI di background
-        const member = await MemberModel.findById(req.user.id);
-        getAIRecommendation(member, { amount, purpose, tenor }).then(async (aiResult) => {
-            if (aiResult) {
-                const ai_score = aiResult.recommendation === 'LAYAK' ? 80 : 20;
-                const max_approved_amount = aiResult.prob_default ? amount * (1 - aiResult.prob_default) : amount * 0.8;
+        
+        // Panggil AI di background (jangan blokir response)
+        scoreLoanApplication(req.user.id, { amount, tenor, purpose })
+            .then(async ({ recommendation, prob_default, ai_score, risk_level }) => {
+                const max_approved_amount = prob_default ? amount * (1 - prob_default) : amount * 0.8;
                 await LoanModel.updateAIResult(loanId, {
                     ai_score,
-                    ai_recommendation: aiResult.recommendation,
-                    prob_default: aiResult.prob_default,
-                    risk_level: aiResult.risk_level,
+                    ai_recommendation: recommendation,
+                    prob_default,
+                    risk_level,
                     max_approved_amount,
                 });
-            }
-        }).catch(err => console.error('AI error:', err));
+                console.log(`[AI] Loan ${loanId} updated with ML result.`);
+            })
+            .catch(err => console.error('[AI] Background error:', err));
+        
         res.status(201).json({ success: true, loanId });
     } catch (err) { next(err); }
 };

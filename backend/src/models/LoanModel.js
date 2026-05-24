@@ -61,10 +61,10 @@ export const create = async (loanData) => {
 };
 
 export const updateAIResult = async (id, aiData) => {
-  const { ai_score, ai_recommendation, prob_default, risk_level, max_approved_amount } = aiData;
-  await pool.query(`
-    UPDATE loans
-    SET ai_score = ?, ai_recommendation = ?, prob_default = ?, risk_level = ?, max_approved_amount = ?
-    WHERE id = ?
-  `, [ai_score, ai_recommendation, prob_default, risk_level, max_approved_amount, id]);
+    const { ai_score, ai_recommendation, prob_default, risk_level, max_approved_amount } = aiData;
+    await pool.query(`
+        UPDATE loans
+        SET ai_score = ?, ai_recommendation = ?, prob_default = ?, risk_level = ?, max_approved_amount = ?
+        WHERE id = ?
+    `, [ai_score, ai_recommendation, prob_default, risk_level, max_approved_amount, id]);
 };

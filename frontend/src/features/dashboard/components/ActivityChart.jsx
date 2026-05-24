@@ -18,7 +18,6 @@ const ActivityChart = ({ labels = [], inflows = [], outflows = [], period, onPer
   const chartHeight = 220;
   const yTicks = [maxValue, maxValue * 0.66, maxValue * 0.33, 0];
 
-  // Pilihan periode untuk dropdown
   const periodOptions = [
     { value: 'week', label: 'Minggu ini' },
     { value: 'month', label: 'Bulan ini' },
@@ -44,7 +43,7 @@ const ActivityChart = ({ labels = [], inflows = [], outflows = [], period, onPer
       </div>
 
       <div className="mb-10">
-        <div className="text-[2.75rem] font-light text-blue-600 leading-none mb-3">
+        <div className="text-[2.75rem] font-light text-primary-700 leading-none mb-3">
           {formatCurrency(totalInflow)}
         </div>
         <div className="text-xl text-gray-900">{totalTransactions} Transaksi</div>
@@ -59,43 +58,51 @@ const ActivityChart = ({ labels = [], inflows = [], outflows = [], period, onPer
           <p className="text-xs mt-1">Transaksi akan muncul di sini</p>
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative overflow-visible">
           <div className="flex">
+            {/* Sumbu Y */}
             <div className="flex flex-col justify-between text-sm text-gray-600 pr-4 h-[220px]">
               {yTicks.map((tick, i) => (
                 <span key={i} className="text-right w-8">{formatCompact(tick)}</span>
               ))}
             </div>
-            <div className="relative flex-1 h-[220px] flex items-end">
-              {/* Grid horizontal */}
+            {/* Area grafik */}
+            <div className="relative flex-1 h-[220px] flex items-end overflow-visible">
+              {/* Garis horizontal bantu */}
               <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                 {yTicks.map((_, idx) => <div key={idx} className="border-t border-gray-200/60 w-full"></div>)}
               </div>
-              {/* Grid vertikal */}
+              {/* Garis vertikal bantu */}
               <div className="absolute inset-0 flex justify-around pointer-events-none px-4">
                 {labels.map((_, idx) => <div key={idx} className="border-l border-gray-200/60 h-full"></div>)}
               </div>
-              {/* Batang */}
+              {/* Batang data */}
               <div className="relative w-full h-full flex justify-around items-end px-4 z-10">
                 {labels.map((label, idx) => {
                   const inflowHeight = (inflows[idx] / maxValue) * chartHeight;
                   const outflowHeight = (outflows[idx] / maxValue) * chartHeight;
                   return (
                     <div key={idx} className="flex-1 flex justify-center gap-1.5 group relative h-full items-end">
-                      <div className="relative">
-                        <div className="w-3 md:w-4 rounded-t-sm bg-green-600 opacity-90 hover:opacity-100 transition-all"
-                             style={{ height: `${inflowHeight}px` }} />
+                      {/* Batang pemasukan */}
+                      <div className="relative flex flex-col items-center">
+                        <div
+                          className="w-3 md:w-4 rounded-t-sm bg-green-600 opacity-90 hover:opacity-100 transition-all"
+                          style={{ height: `${inflowHeight}px` }}
+                        />
                         {inflows[idx] > 0 && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 shadow-lg">
                             +{formatCurrency(inflows[idx])}
                           </div>
                         )}
                       </div>
-                      <div className="relative">
-                        <div className="w-3 md:w-4 rounded-t-sm bg-red-500 opacity-90 hover:opacity-100 transition-all"
-                             style={{ height: `${outflowHeight}px` }} />
+                      {/* Batang pengeluaran */}
+                      <div className="relative flex flex-col items-center">
+                        <div
+                          className="w-3 md:w-4 rounded-t-sm bg-red-500 opacity-90 hover:opacity-100 transition-all"
+                          style={{ height: `${outflowHeight}px` }}
+                        />
                         {outflows[idx] > 0 && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20 shadow-lg">
                             -{formatCurrency(outflows[idx])}
                           </div>
                         )}
@@ -106,6 +113,7 @@ const ActivityChart = ({ labels = [], inflows = [], outflows = [], period, onPer
               </div>
             </div>
           </div>
+          {/* Sumbu X (label) */}
           <div className="flex pl-[3.5rem] pr-4 mt-4">
             {labels.map((label, idx) => (
               <div key={idx} className="flex-1 text-center text-sm text-gray-900">{label}</div>
@@ -114,6 +122,7 @@ const ActivityChart = ({ labels = [], inflows = [], outflows = [], period, onPer
         </div>
       )}
 
+      {/* Legenda */}
       <div className="flex items-center gap-6 mt-10">
         <div className="flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-full bg-green-600"></span><span className="text-base font-medium">Pemasukan</span></div>
         <div className="flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-full bg-red-500"></span><span className="text-base font-medium">Pengeluaran</span></div>
