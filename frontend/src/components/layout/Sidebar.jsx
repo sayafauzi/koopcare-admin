@@ -8,6 +8,7 @@ import {
   CurrencyDollarIcon,
   DocumentTextIcon,
   ArrowLeftOnRectangleIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 
 // Navigasi disesuaikan dengan teks di wireframe dan penambahan menu Anggota
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Manajemen Pinjaman', tooltip: 'Loan Management', href: '/loans', icon: WalletIcon },
   { name: 'Kasir', tooltip: 'Cashier', href: '/cashier', icon: CurrencyDollarIcon },
   { name: 'Buku Besar', tooltip: 'General Ledger', href: '/ledger', icon: DocumentTextIcon },
+  { name: 'Kode Undangan', href: '/admin/invite-codes', icon: KeyIcon },
 ];
 
 const Sidebar = ({ onLogout }) => {

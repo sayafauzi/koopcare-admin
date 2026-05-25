@@ -10,6 +10,7 @@ import CashierPage from './features/cashier/CashierPage';
 import LedgerPage from './features/ledger/LedgerPage';
 import useAuthStore from './store/authStore';
 import RegisterPage from './features/auth/RegisterPage';
+import InviteCodeManagementPage from './features/admin/InviteCodeManagementPage';
 
 // Sementara bypass auth agar bisa lihat tampilan (backend belum siap)
 const PrivateRoute = ({ children }) => {
@@ -32,6 +33,7 @@ function App() {
           <Route path="loans" element={<LoanListPage />} />
           <Route path="cashier" element={<CashierPage />} />
           <Route path="ledger" element={<LedgerPage />} />
+          <Route path="admin/invite-codes" element={<InviteCodeManagementPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
