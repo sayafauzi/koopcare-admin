@@ -90,6 +90,12 @@ export const requestOtp = async (req, res, next) => {
 export const verifyOtp = async (req, res, next) => {
     try {
         const { identifier, otp } = req.body;
+
+        if (process.env.USE_DUMMY_OTP === 'true' && otp === process.env.DUMMY_OTP_CODE) {
+            console.log(`[OTP] Mode DUMMY: Verifikasi OTP berhasil untuk ${identifier} dengan kode tetap.`);
+            return res.json({ success: true, message: 'OTP valid' });
+        }
+
         const stored = otpStore.get(identifier);
         if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
             return res.status(400).json({ error: 'OTP tidak valid atau kadaluarsa' });
