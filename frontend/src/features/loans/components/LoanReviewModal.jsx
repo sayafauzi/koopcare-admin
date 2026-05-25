@@ -5,8 +5,8 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Spinner from '../../../components/ui/Spinner';
 import { fetchLoanDetail } from '../../../services/loanService';
-import { formatCurrency } from '../../../utils/formatters';
-import { UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { formatCurrency, formatPhoneToWaLink } from '../../../utils/formatters';
+import { UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
   const [loan, setLoan] = useState(null);
@@ -60,7 +60,24 @@ const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
         <div className="space-y-6">
           {/* Informasi Anggota */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <InfoItem icon={UserIcon} label="Anggota" value={loan.member_name} />
+            <div className="flex items-start gap-2">
+              <UserIcon className="h-4 w-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="text-xs text-neutral-500 uppercase tracking-wide">Anggota</div>
+                <div className="font-medium text-neutral-800 break-words flex items-center gap-2">
+                  {loan.member_name}
+                  <a
+                    href={`https://wa.me/${formatPhoneToWaLink(loan.phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-600 hover:text-green-800"
+                    title="Chat via WhatsApp"
+                  >
+                    <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
             <InfoItem icon={BriefcaseIcon} label="Pekerjaan" value={loan.occupation || '-'} />
             <InfoItem icon={CalendarIcon} label="Lama Anggota" value={loan.tenure_months ? `${loan.tenure_months} bulan` : '-'} />
             <InfoItem icon={CurrencyDollarIcon} label="Jumlah Pinjaman" value={formatCurrency(loan.amount)} />

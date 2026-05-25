@@ -7,6 +7,8 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Modal from '../../components/ui/Modal';
 import Spinner from '../../components/ui/Spinner';
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { formatPhoneToWaLink } from '../../utils/formatters';
 
 const roleOptions = [
   { value: '', label: 'Semua' },
@@ -92,6 +94,21 @@ const MemberListPage = () => {
           </Button>
         </div>
       ),
+    },
+    {
+      header: 'WA',
+      accessor: (row) => (
+        <a
+          href={`https://wa.me/${formatPhoneToWaLink(row.phone)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-green-600 hover:text-green-800 transition-colors inline-flex"
+          title="Chat via WhatsApp"
+        >
+          <ChatBubbleLeftRightIcon className="h-5 w-5" />
+        </a>
+      ),
+      align: 'text-center',
     },
   ];
 

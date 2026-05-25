@@ -25,3 +25,8 @@ export const formatDateTime = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString('id-ID');
 };
+
+export const formatPhoneToWaLink = (phone) => {
+  if (!phone) return '';
+  return phone.replace(/\D/g, '');
+};
