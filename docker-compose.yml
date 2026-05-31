@@ -12,17 +12,21 @@ services:
       MYSQL_USER: koopcare_user
       MYSQL_PASSWORD: koopcarepassword
     ports:
-      - "3306:3306"
+      - "${MYSQL_HOST_PORT:-3306}:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   # 2. Backend Node.js API
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     container_name: koopcare_backend
-    restart: always
+    restart: unless-stopped
     ports:
       - "5001:5000"
     environment:
@@ -32,11 +36,17 @@ services:
       - DB_PASSWORD=koopcarepassword
       - DB_NAME=koopcare_db
       - JWT_SECRET=supersecretkoopcarekey
+      - NODE_ENV=development
+      # - ML_API_BASE_URL=http://host.docker.internal:8000
+      - ML_API_BASE_URL=https://koopcare-mlops-credit-scoring-api-production.up.railway.app
+      - ML_API_TIMEOUT_MS=5000
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - /app/node_modules   # jangan mount node_modules dari host
+    command: sh -c "npm install && npm run dev"
 
   # 3. Frontend React Vite
   frontend:
@@ -48,7 +58,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:5001
+      - VITE_API_URL=http://localhost:5001/api/v1
     depends_on:
       - backend
     volumes:

@@ -1,57 +1,15 @@
-/* frontend/src/index.css */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* 1. Definisi Warna Tema KoopCare */
-@theme {
-  --color-primary: #7A8E60; 
-  --color-secondary: #E5C07A; 
-  --color-dark: #2D3748;
-  --color-light: #F7FAFC;
-}
-
-/* 2. Pengaturan Dasar Halaman */
 @layer base {
   body {
-    background-color: theme('colors.light');
-    font-family: 'Inter', system-ui, sans-serif;
-    color: theme('colors.dark');
-    -webkit-font-smoothing: antialiased;
+    @apply bg-neutral-100 text-neutral-800 font-body;
   }
-}
-
-/* 3. Komponen Desain Sistem (Agar kode React lebih bersih) */
-@layer components {
-  /* Input Form (Sudah dipakai di Login/Register) */
-  .koopcare-input {
-    @apply block w-full py-2.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
   }
-  
-  /* Tombol Utama */
-  .koopcare-button-primary {
-    @apply w-full bg-secondary text-dark font-bold py-3 px-4 rounded-lg hover:bg-yellow-500 transition duration-200 text-sm shadow-sm;
-  }
-
-  /* Kartu (Card) untuk Dashboard */
-  .koopcare-card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md;
-  }
-
-  /* Menu Sidebar */
-  .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200;
-  }
-  .sidebar-link-active {
-    @apply bg-primary text-white shadow-md;
-  }
-  .sidebar-link-inactive {
-    @apply text-gray-500 hover:bg-primary/10 hover:text-primary;
-  }
-
-  /* Tabel Admin */
-  .table-header {
-    @apply px-6 py-4 border-b border-gray-100 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50;
-  }
-  .table-cell {
-    @apply px-6 py-4 text-sm border-b border-gray-50;
-  }
+  h1 { @apply text-3xl md:text-4xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
 }

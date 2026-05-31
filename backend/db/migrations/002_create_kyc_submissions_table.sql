@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS kyc_submissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    member_id INT NOT NULL COMMENT 'ID anggota yang mengajukan',
+    full_name VARCHAR(100) NOT NULL COMMENT 'Nama sesuai KTP',
+    nik VARCHAR(16) NOT NULL COMMENT 'NIK sesuai KTP',
+    phone VARCHAR(15) NOT NULL COMMENT 'Nomor WhatsApp',
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Tanggal pengajuan',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING' COMMENT 'Status verifikasi',
+    ktp_photo_url VARCHAR(255) NULL COMMENT 'URL foto e-KTP',
+    selfie_photo_url VARCHAR(255) NULL COMMENT 'URL foto selfie dengan KTP',
+    notes TEXT NULL COMMENT 'Catatan penolakan atau internal',
+    reviewed_by INT NULL COMMENT 'ID admin yang mereview',
+    reviewed_at TIMESTAMP NULL COMMENT 'Waktu review',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+    INDEX idx_nik (nik),
+    INDEX idx_status (status),
+    INDEX idx_member (member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pengajuan verifikasi KYC';

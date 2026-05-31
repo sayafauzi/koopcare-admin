@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS loans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    member_id INT NOT NULL COMMENT 'ID anggota peminjam',
+    request_number VARCHAR(20) UNIQUE NOT NULL COMMENT 'Nomor pengajuan unik',
+    amount DECIMAL(15,2) NOT NULL COMMENT 'Jumlah pinjaman diajukan',
+    tenor INT NOT NULL COMMENT 'Tenor dalam bulan',
+    purpose TEXT NULL COMMENT 'Tujuan pinjaman',
+    type ENUM('MURABAHAH', 'QARDHUL_HASAN') DEFAULT 'MURABAHAH' COMMENT 'Jenis pembiayaan',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED', 'ACTIVE', 'PAID_OFF', 'DEFAULTED') DEFAULT 'PENDING' COMMENT 'Status pinjaman',
+    ai_score INT DEFAULT 0 COMMENT 'Skor kelayakan AI (0-100)',
+    max_approved_amount DECIMAL(15,2) NULL COMMENT 'Maksimum yang disarankan AI',
+    approved_amount DECIMAL(15,2) NULL COMMENT 'Jumlah disetujui admin',
+    approved_tenor INT NULL COMMENT 'Tenor disetujui (bulan)',
+    rejection_reason TEXT NULL COMMENT 'Alasan penolakan',
+    reviewed_by INT NULL COMMENT 'ID admin yang mereview',
+    reviewed_at TIMESTAMP NULL COMMENT 'Waktu review',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+    INDEX idx_status (status),
+    INDEX idx_member (member_id),
+    INDEX idx_request_number (request_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Data pinjaman anggota';
