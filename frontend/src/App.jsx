@@ -9,6 +9,7 @@ import KYC from './pages/KYC/KYC';
 import Loans from './pages/Loan/Loans';
 import Cashier from './pages/Cashier/Cashier';
 import Ledger from './pages/Ledger/Ledger';
+import LandingPage from './pages/LandingPage/LandingPage';
 
 function App() {
   return (
@@ -24,8 +25,8 @@ function App() {
         <Route path="/cashier" element={<Cashier />} />
         <Route path="/ledger" element={<Ledger />} />
         
-        {/* Redirect Root */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Root Landing Page */}
+        <Route path="/" element={<LandingPage />} />
       </Routes>
     </Router>
   );
