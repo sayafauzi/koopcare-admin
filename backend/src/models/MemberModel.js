@@ -48,7 +48,10 @@ export const findAll = async (limit, offset, search = '', role = null) => {
 
 
 export const findById = async (id) => {
-  const [rows] = await pool.query('SELECT id, full_name, nik, phone, status, balance FROM members WHERE id = ?', [id]);
+  const [rows] = await pool.query('SELECT * FROM members WHERE id = ?', [id]);
+  if (rows[0]) {
+    delete rows[0].pin;
+  }
   return rows[0];
 };
 
@@ -101,7 +104,8 @@ export const createMember = async (memberData) => {
     monthly_income, tenure_months, existing_loan_balance, has_collateral,
     code_gender, birth_date, education, family_status, income_type, occupation,
     own_car, own_realty, children_count, family_members,
-    employed_days, last_phone_change_days
+    employed_days, last_phone_change_days,
+    vehicle_type, property_type
   } = memberData;
 
   const normalizedPhone = normalizePhone(phone);
@@ -112,15 +116,17 @@ export const createMember = async (memberData) => {
       monthly_income, tenure_months, existing_loan_balance, has_collateral,
       code_gender, birth_date, education, family_status, income_type, occupation,
       own_car, own_realty, children_count, family_members,
-      employed_days, last_phone_change_days
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      employed_days, last_phone_change_days,
+      vehicle_type, property_type
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       fullName, nik, normalizedPhone, email, pin, status, role || 'member',
       monthly_income || 0, tenure_months || 0, existing_loan_balance || 0, has_collateral || false,
-      code_gender || 'M', birth_date || null, education || 'Secondary / secondary special',
-      family_status || 'Single', income_type || 'Working', occupation || 'Laborers',
-      own_car || false, own_realty || false, children_count || 0, family_members || 1,
-      employed_days || -1825, last_phone_change_days || -180
+      code_gender || null, birth_date || null, education || null,
+      family_status || null, income_type || null, occupation || null,
+      own_car || null, own_realty || null, children_count || null, family_members || null,
+      employed_days || null, last_phone_change_days || null,
+      vehicle_type || null, property_type || null
     ]
   );
   return result.insertId;

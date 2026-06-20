@@ -77,10 +77,54 @@ export const rejectLoan = async (req, res, next) => {
 };
 
 export const createLoan = async (req, res, next) => {
+    let loanId;
     try {
-        const { member_id, amount, tenor, purpose, type } = req.body;
-        const request_number = `LOAN${Date.now()}`;
-        const loanId = await loanModel.create({ member_id, request_number, amount, tenor, purpose, type, status: 'PENDING' });
+        let { member_id, amount, tenor, purpose, type } = req.body;
+
+        // ── Validasi member_id ───────────────────────────────────────
+        if (!member_id || isNaN(parseInt(member_id, 10))) {
+            return next(new Error('member_id tidak valid'));
+        }
+
+        // ── Sanitasi & validasi amount ─────────────────────────────
+        const rawAmount = String(amount ?? '').replace(/[^0-9]/g, '');
+        const numAmount = parseInt(rawAmount, 10);
+        if (!rawAmount || isNaN(numAmount) || numAmount <= 0) {
+            return next(new Error('Jumlah pembiayaan tidak valid.'));
+        }
+        if (numAmount < 100000) {
+            return next(new Error('Jumlah pembiayaan minimal Rp 100.000.'));
+        }
+        if (numAmount > 500000000) {
+            return next(new Error('Jumlah pembiayaan maksimal Rp 500.000.000.'));
+        }
+        amount = numAmount;
+
+        // ── Sanitasi tenor ────────────────────────────────────────────
+        const numTenor = parseInt(tenor, 10);
+        if (isNaN(numTenor) || numTenor <= 0) {
+            return next(new Error('Tenor tidak valid.'));
+        }
+        tenor = numTenor;
+
+        // ── Sanitasi purpose ─────────────────────────────────────────
+        purpose = String(purpose ?? '').trim();
+        if (!purpose || purpose.length < 3) {
+            return next(new Error('Tujuan pembiayaan harus diisi (min. 3 karakter).'));
+        }
+        if (purpose.length > 255) {
+            return next(new Error('Tujuan pembiayaan terlalu panjang.'));
+        }
+
+        // ── Sanitasi type ─────────────────────────────────────────────
+        const validTypes = ['MURABAHAH', 'QARDHUL_HASAN'];
+        type = String(type ?? '').trim().toUpperCase();
+        if (!validTypes.includes(type)) {
+            return next(new Error('Jenis produk pembiayaan tidak valid.'));
+        }
+
+        const request_number = `K${Date.now()}`;
+        loanId = await loanModel.create({ member_id, request_number, amount, tenor, purpose, type, status: 'PENDING' });
         
         // Panggil AI secara synchronous (await) agar hasil langsung tersimpan
         const { recommendation, prob_default, ai_score, risk_level } = await scoreLoanApplication(member_id, { amount, tenor, purpose });
@@ -93,7 +137,8 @@ export const createLoan = async (req, res, next) => {
             risk_level,
             max_approved_amount,
         });
-        await notificationModel.create(member_id, 'Analisis AI Selesai', `Pengajuan pinjaman telah dianalisis. Skor kelayakan: ${ai_score} (${recommendation})`);
+        const formattedAmount = `Rp${Number(amount).toLocaleString('id-ID')}`;
+        await notificationModel.create(member_id, 'Analisis AI Selesai', `Pengajuan pinjaman ${formattedAmount} telah dianalisis. Skor kelayakan: ${ai_score} (${recommendation})`);
         console.log(`[AI] Loan ${loanId} updated with ML result.`);
         
         res.status(201).json({ success: true, loanId });

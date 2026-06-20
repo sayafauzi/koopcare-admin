@@ -2,6 +2,12 @@ import { Router } from 'express';
 import mobileAuth from '../../middlewares/mobileAuth.js';
 import * as mobileController from '../../controllers/mobileController.js';
 import { uploadKyc } from '../../config/cloudinary.js';
+import {
+  createTopup,
+  getTopupStatus,
+  createInstallmentPayment,
+  getInstallmentPaymentStatus,
+} from '../../controllers/paymentController.js';
 
 const router = Router();
 
@@ -36,5 +42,12 @@ router.get('/notifications', mobileController.getNotifications);
 router.get('/notifications/unread-count', mobileController.getUnreadNotificationCount);
 router.patch('/notifications/:id/read', mobileController.markNotificationRead);
 router.patch('/notifications/read-all', mobileController.markAllNotificationsRead);
+router.post('/topup', mobileController.createTopup);
+router.get('/topup/:order_id/status', mobileController.getTopupStatus);
+router.get('/loans/:id/installments', mobileController.getLoanInstallments);
+router.post('/loans/:loanId/installments/:installmentId/pay-balance', mobileController.payInstallmentFromBalance);
+router.post('/loans/:loanId/installments/:installmentId/pay-midtrans',createInstallmentPayment);
+router.get('/loans/:loanId/installments/:installmentId/payment-status',getInstallmentPaymentStatus);
+router.post('/transfer', mobileController.executeTransfer);
 
 export default router;

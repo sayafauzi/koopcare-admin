@@ -9,6 +9,10 @@ import { hashPin, verifyPin, generateRandomPin } from '../services/pinService.js
 import { scoreLoanApplication } from '../services/loanMlScoringService.js';
 import jwt from 'jsonwebtoken';
 import { normalizePhone, normalizeIdentifier, validatePhone } from '../utils/validators.js';
+import * as InstallmentModel from '../models/InstallmentModel.js';
+import * as transactionService from '../services/transactionService.js';
+import pool from '../config/database.js';
+
 
 // Helper untuk OTP sederhana (simulasi, bisa diganti dengan WhatsApp)
 const otpStore = new Map();
@@ -248,8 +252,47 @@ export const getMemberLoans = async (req, res, next) => {
 
 export const applyLoan = async (req, res, next) => {
     try {
-        const { amount, tenor, purpose, type } = req.body;
-        
+        let { amount, tenor, purpose, type } = req.body;
+
+        // ── Sanitasi & Validasi amount ───────────────────────────────
+        // Strip karakter non-numerik (titik/koma pemisah ribuan) lalu parse
+        const rawAmount = String(amount ?? '').replace(/[^0-9]/g, '');
+        const numAmount = parseInt(rawAmount, 10);
+
+        if (!rawAmount || isNaN(numAmount) || numAmount <= 0) {
+            return res.status(400).json({ error: 'Jumlah pembiayaan tidak valid.' });
+        }
+        if (numAmount < 100000) {
+            return res.status(400).json({ error: 'Jumlah pembiayaan minimal Rp 100.000.' });
+        }
+        if (numAmount > 500000000) {
+            return res.status(400).json({ error: 'Jumlah pembiayaan maksimal Rp 500.000.000.' });
+        }
+        amount = numAmount; // gunakan nilai bersih
+
+        // ── Sanitasi tenor ───────────────────────────────────────────
+        const numTenor = parseInt(tenor, 10);
+        if (isNaN(numTenor) || numTenor <= 0) {
+            return res.status(400).json({ error: 'Tenor tidak valid.' });
+        }
+        tenor = numTenor;
+
+        // ── Sanitasi purpose ────────────────────────────────────────
+        purpose = String(purpose ?? '').trim();
+        if (!purpose || purpose.length < 3) {
+            return res.status(400).json({ error: 'Tujuan pembiayaan harus diisi (min. 3 karakter).' });
+        }
+        if (purpose.length > 255) {
+            return res.status(400).json({ error: 'Tujuan pembiayaan terlalu panjang.' });
+        }
+
+        // ── Sanitasi type ────────────────────────────────────────────
+        const validTypes = ['MURABAHAH', 'QARDHUL_HASAN'];
+        type = String(type ?? '').trim().toUpperCase();
+        if (!validTypes.includes(type)) {
+            return res.status(400).json({ error: 'Jenis produk pembiayaan tidak valid.' });
+        }
+
         // Cek status keaktifan anggota
         const member = await MemberModel.findById(req.user.id);
         if (!member) {
@@ -259,7 +302,7 @@ export const applyLoan = async (req, res, next) => {
             return res.status(403).json({ error: 'Akun Anda belum aktif. Harap verifikasi KYC terlebih dahulu.' });
         }
 
-        const request_number = `LOAN${Date.now()}`;
+        const request_number = `K${Date.now()}`;
         const loanId = await LoanModel.create({
             member_id: req.user.id,
             request_number,
@@ -282,7 +325,8 @@ export const applyLoan = async (req, res, next) => {
                     max_approved_amount,
                 });
                 // Tambahkan notifikasi AI selesai
-                await notificationModel.create(req.user.id, 'Analisis AI Selesai', `Pengajuan pinjaman Anda telah dianalisis. Skor kelayakan: ${ai_score} (${recommendation})`);
+                const formattedAmount = `Rp${Number(amount).toLocaleString('id-ID')}`;
+                await notificationModel.create(req.user.id, 'Analisis AI Selesai', `Pengajuan pinjaman ${formattedAmount} Anda telah dianalisis. Skor kelayakan: ${ai_score} (${recommendation})`);
                 console.log(`[AI] Loan ${loanId} updated with ML result.`);
             })
             .catch(err => console.error('[AI] Background error:', err));
@@ -335,3 +379,109 @@ export const markAllNotificationsRead = async (req, res, next) => {
         res.json({ success: true });
     } catch (err) { next(err); }
 };
+
+// GET /mobile/loans/:id/installments
+export const getLoanInstallments = async (req, res, next) => {
+    try {
+        const loan = await LoanModel.findById(req.params.id);
+        if (!loan || loan.member_id !== req.user.id) {
+            return res.status(404).json({ error: 'Pinjaman tidak ditemukan' });
+        }
+        const installments = await InstallmentModel.findByLoanId(req.params.id);
+        res.json({ success: true, data: installments });
+    } catch (err) { next(err); }
+};
+
+// POST /mobile/loans/:loanId/installments/:installmentId/pay-balance
+export const payInstallmentFromBalance = async (req, res, next) => {
+    try {
+        const { loanId, installmentId } = req.params;
+
+        // 1. Ownership + existence
+        const loan = await LoanModel.findById(loanId);
+        if (!loan || loan.member_id !== req.user.id) {
+            return res.status(404).json({ error: 'Pinjaman tidak ditemukan' });
+        }
+        const installment = await InstallmentModel.findById(installmentId);
+        if (!installment || installment.loan_id !== Number(loanId)) {
+            return res.status(404).json({ error: 'Cicilan tidak ditemukan' });
+        }
+        if (installment.status === 'PAID') {
+            return res.status(400).json({ error: 'Cicilan ini sudah dibayar' });
+        }
+
+        // 2. Sequential rule — must be the next unpaid installment
+        const next = await InstallmentModel.findNextUnpaid(loanId);
+        if (!next || next.id !== installment.id) {
+            return res.status(400).json({
+                error: 'Harap bayar cicilan sebelumnya terlebih dahulu',
+            });
+        }
+
+        // 3. Debit balance via the existing transaction service (it checks
+        //    sufficient balance and throws 'Saldo tidak mencukupi' if not).
+        //    recordTransaction with BAYAR_ANGSURAN already debits members.balance.
+        const transactionId = await transactionService.recordTransaction({
+            member_id: req.user.id,
+            type: 'BAYAR_ANGSURAN',
+            amount: Number(installment.amount),
+            description: `Pembayaran cicilan #${installment.installment_number} (${loan.request_number})`,
+            reference_id: String(loanId),
+            cashier_id: null,
+        });
+
+        // 4. Mark installment paid, linked to that ledger row.
+        await InstallmentModel.markPaid(installment.id, transactionId);
+
+        // 5. If that was the last installment, mark loan PAID_OFF.
+        const remaining = await InstallmentModel.findNextUnpaid(loanId);
+        if (!remaining) {
+            await pool.query(`UPDATE loans SET status = 'PAID_OFF' WHERE id = ?`, [loanId]);
+        }
+
+        res.json({ success: true, message: 'Cicilan berhasil dibayar', transactionId });
+    } catch (err) {
+        // recordTransaction throws 'Saldo tidak mencukupi' — surface as 400
+        if (err.message?.includes('Saldo tidak mencukupi')) {
+            return res.status(400).json({ error: 'Saldo tidak mencukupi' });
+        }
+        next(err);
+    }
+};
+
+export const executeTransfer = async (req, res, next) => {
+    try {
+        const { amount, bank, rekening } = req.body;
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ error: 'Nominal transfer harus lebih dari 0' });
+        }
+        if (!bank) {
+            return res.status(400).json({ error: 'Bank tujuan harus diisi' });
+        }
+        if (!rekening) {
+            return res.status(400).json({ error: 'Nomor rekening tujuan harus diisi' });
+        }
+
+        const transactionId = await transactionService.recordTransaction({
+            member_id: req.user.id,
+            type: 'TRANSFER',
+            amount: Number(amount),
+            description: `Transfer ke ${bank} - ${rekening}`,
+            reference_id: null,
+            cashier_id: null,
+        });
+
+        res.json({
+            success: true,
+            message: 'Transfer berhasil',
+            transactionId
+        });
+    } catch (err) {
+        if (err.message?.includes('Saldo tidak mencukupi')) {
+            return res.status(400).json({ error: 'Saldo tidak mencukupi' });
+        }
+        next(err);
+    }
+};
+
+export { createTopup, getTopupStatus } from './paymentController.js';

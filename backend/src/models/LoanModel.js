@@ -9,17 +9,29 @@ export const findAll = async (limit, offset, status = null) => {
   `;
   const params = [];
   if (status && status !== 'ALL') {
-    query += ' WHERE l.status = ?';
-    params.push(status);
+    if (status === 'APPROVED') {
+      query += " WHERE l.status IN ('APPROVED', 'ACTIVE', 'PAID_OFF', 'DEFAULTED')";
+    } else {
+      query += ' WHERE l.status = ?';
+      params.push(status);
+    }
   }
   query += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
   params.push(limit, offset);
   const [rows] = await pool.query(query, params);
 
-  const countQuery = status && status !== 'ALL'
-    ? 'SELECT COUNT(*) as total FROM loans WHERE status = ?'
-    : 'SELECT COUNT(*) as total FROM loans';
-  const countParams = status && status !== 'ALL' ? [status] : [];
+  let countQuery;
+  const countParams = [];
+  if (status && status !== 'ALL') {
+    if (status === 'APPROVED') {
+      countQuery = "SELECT COUNT(*) as total FROM loans WHERE status IN ('APPROVED', 'ACTIVE', 'PAID_OFF', 'DEFAULTED')";
+    } else {
+      countQuery = 'SELECT COUNT(*) as total FROM loans WHERE status = ?';
+      countParams.push(status);
+    }
+  } else {
+    countQuery = 'SELECT COUNT(*) as total FROM loans';
+  }
   const [countRows] = await pool.query(countQuery, countParams);
   return { data: rows, total: countRows[0].total };
 };
@@ -27,7 +39,9 @@ export const findAll = async (limit, offset, status = null) => {
 export const findById = async (id) => {
   const [rows] = await pool.query(`
     SELECT l.*, m.full_name as member_name, m.nik, m.phone, m.balance,
-           (SELECT COUNT(*) FROM loans WHERE member_id = m.id AND status = 'ACTIVE') as active_loans
+           (SELECT COUNT(*) FROM loans WHERE member_id = m.id AND status = 'ACTIVE') as active_loans,
+           (SELECT COALESCE(SUM(amount), 0) FROM loan_installments WHERE loan_id = l.id AND status = 'PAID') as total_paid,
+           (SELECT COALESCE(SUM(amount), 0) FROM loan_installments WHERE loan_id = l.id AND status = 'PENDING') as total_remaining
     FROM loans l
     JOIN members m ON l.member_id = m.id
     WHERE l.id = ?
@@ -36,7 +50,14 @@ export const findById = async (id) => {
 };
 
 export const findByMemberId = async (memberId) => {
-    const [rows] = await pool.query('SELECT * FROM loans WHERE member_id = ? ORDER BY created_at DESC', [memberId]);
+    const [rows] = await pool.query(`
+        SELECT l.*,
+               (SELECT COALESCE(SUM(amount), 0) FROM loan_installments WHERE loan_id = l.id AND status = 'PAID') as total_paid,
+               (SELECT COALESCE(SUM(amount), 0) FROM loan_installments WHERE loan_id = l.id AND status = 'PENDING') as total_remaining
+        FROM loans l
+        WHERE l.member_id = ?
+        ORDER BY l.created_at DESC
+    `, [memberId]);
     return rows;
 };
 

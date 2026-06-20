@@ -6,7 +6,7 @@ import Input from '../../../components/ui/Input';
 import Spinner from '../../../components/ui/Spinner';
 import { fetchLoanDetail } from '../../../services/loanService';
 import { formatCurrency, formatPhoneToWaLink } from '../../../utils/formatters';
-import { UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon, ChatBubbleLeftRightIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
   const [loan, setLoan] = useState(null);
@@ -83,35 +83,36 @@ const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
             <InfoItem icon={CurrencyDollarIcon} label="Jumlah Pinjaman" value={formatCurrency(loan.amount)} />
           </div>
 
-          {/* AI Scoring */}
-          {/* <div className={`p-3 rounded-lg border ${isEligible ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-            <div className="flex items-center gap-2">
-              {isEligible ? <CheckCircleIcon className="h-5 w-5 text-green-600" /> : <XCircleIcon className="h-5 w-5 text-red-600" />}
-              <span className={`font-semibold ${isEligible ? 'text-green-700' : 'text-red-700'}`}>
-                {isEligible ? 'LAYAK' : 'TIDAK LAYAK'}
-              </span>
-              <span className="text-xs text-neutral-500">(Skor: {loan.ai_score}%)</span>
-            </div>
-            <p className="text-sm text-neutral-600 mt-1">Maksimal disetujui: <span className="font-medium">{formatCurrency(loan.max_approved_amount || loan.amount * 0.8)}</span></p>
-          </div> */}
-
           {/* Rekomendasi AI */}
           {loan.ai_recommendation && (
-              <div className={`p-3 rounded-lg border ${loan.ai_recommendation === 'LAYAK' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className={`p-3 rounded-lg border ${
+                  loan.ai_recommendation === 'LAYAK' 
+                      ? 'bg-green-50 border-green-200 text-green-800' 
+                      : loan.ai_recommendation === 'PERLU_DIPERTIMBANGKAN'
+                          ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                          : 'bg-red-50 border-red-200 text-red-800'
+              }`}>
                   <div className="flex items-center gap-2">
                       {loan.ai_recommendation === 'LAYAK' ? (
                           <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                      ) : loan.ai_recommendation === 'PERLU_DIPERTIMBANGKAN' ? (
+                          <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
                       ) : (
                           <XCircleIcon className="h-5 w-5 text-red-600" />
                       )}
-                      <span className="font-semibold">Rekomendasi AI: {loan.ai_recommendation}</span>
-                      {loan.prob_default && (
-                          <span className="text-xs text-neutral-500">
+                      <span className="font-semibold">Rekomendasi AI: {loan.ai_recommendation.replace(/_/g, ' ')}</span>
+                      {loan.prob_default !== undefined && loan.prob_default !== null && (
+                          <span className="text-xs opacity-80">
                               (Probabilitas gagal bayar: {(loan.prob_default * 100).toFixed(1)}%)
                           </span>
                       )}
                   </div>
-                  <p className="text-xs text-neutral-600 mt-1">*Keputusan akhir tetap di tangan admin.</p>
+                  {loan.max_approved_amount !== undefined && loan.max_approved_amount !== null && (
+                      <div className="text-xs font-semibold mt-1">
+                          Limit Maksimum Rekomendasi AI: {formatCurrency(loan.max_approved_amount)}
+                      </div>
+                  )}
+                  <p className="text-xs opacity-75 mt-1">*Keputusan akhir tetap di tangan admin.</p>
               </div>
           )}
 
@@ -174,8 +175,17 @@ const LoanReviewModal = ({ isOpen, onClose, loanId, onApprove, onReject }) => {
               )}
             </div>
           ) : (
-            <div className={`p-3 rounded-lg text-center text-sm font-medium ${loan.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {loan.status === 'APPROVED' ? '✓ Disetujui' : '✗ Ditolak'}
+            <div className={`p-3 rounded-lg text-center text-sm font-medium ${['APPROVED', 'ACTIVE', 'PAID_OFF', 'DEFAULTED'].includes(loan.status) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {['APPROVED', 'ACTIVE', 'PAID_OFF', 'DEFAULTED'].includes(loan.status) ? (
+                <>
+                  ✓ Disetujui
+                  {loan.status === 'ACTIVE' && <span className="ml-1.5 text-xs opacity-90">(Aktif)</span>}
+                  {loan.status === 'PAID_OFF' && <span className="ml-1.5 text-xs opacity-90">(Lunas)</span>}
+                  {loan.status === 'DEFAULTED' && <span className="ml-1.5 text-xs opacity-90">(Gagal Bayar)</span>}
+                </>
+              ) : (
+                <>✗ Ditolak</>
+              )}
               {loan.rejection_reason && <div className="text-xs mt-1 font-normal">Alasan: {loan.rejection_reason}</div>}
             </div>
           )}

@@ -57,20 +57,12 @@ const LoginPage = () => {
         <div className="max-w-lg">
           {/* Logo */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 bg-[#EDBF5D] rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <svg
-                className="w-7 h-7 text-[#386518]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                <path d="M12 4v16" />
-              </svg>
-            </div>
+            <img
+              src="/images/koopcare.png"
+              alt="KoopCare Logo"
+              className="w-16 h-16 object-contain flex-shrink-0"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
             <h1 className="text-4xl font-bold tracking-wide">KoopCare</h1>
           </div>
 

@@ -42,25 +42,16 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white text-neutral-800 font-body relative select-none">
       
       {/* Header/Navbar */}
-      <header className="relative z-50 bg-white/75 backdrop-blur-md border-b border-neutral-100/80">
+      <header className="sticky top-0 z-50 bg-white/75 backdrop-blur-md border-b border-neutral-100/80">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
           
           {/* Logo Section */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#EDBF5D] rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-[#EDBF5D]/20">
-              <svg
-                className="w-5 h-5 text-[#386518]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                <path d="M12 4v16" />
-              </svg>
-            </div>
+            <img
+              src="/images/koopcare.png"
+              alt="KoopCare Logo"
+              className="w-12 h-12 object-contain flex-shrink-0"
+            />
             <div>
               <h1 className="text-lg font-bold tracking-wide font-heading text-[#386518] leading-none">KoopCare</h1>
               <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Portal Koperasi</p>
@@ -497,12 +488,12 @@ const LandingPage = () => {
       <footer className="bg-neutral-900 text-neutral-400 py-12 px-6 border-t border-neutral-850">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#EDBF5D] rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-[#386518]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                <path d="M12 4v16" />
-              </svg>
-            </div>
+            <img
+              src="/images/koopcare.png"
+              alt="KoopCare Logo"
+              className="w-10 h-10 object-contain flex-shrink-0"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
             <span className="text-white font-bold tracking-wide font-heading text-sm">KoopCare</span>
           </div>
 

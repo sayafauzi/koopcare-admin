@@ -1,5 +1,6 @@
 // backend/src/services/loanService.js
 import * as loanModel from '../models/LoanModel.js';
+import * as installmentModel from '../models/InstallmentModel.js';
 
 export const getAllLoans = async (page, limit, status) => {
   const offset = (page - 1) * limit;
@@ -17,7 +18,17 @@ export const approveLoan = async (id, reviewerId, approvedAmount, approvedTenor)
   const loan = await loanModel.findById(id);
   if (!loan) throw new Error('Pengajuan tidak ditemukan');
   if (loan.status !== 'PENDING') throw new Error('Pengajuan sudah diproses');
+
   await loanModel.updateStatus(id, 'APPROVED', reviewerId, approvedAmount, approvedTenor);
+
+  // Generate the installment schedule now that amount + tenor are fixed.
+  await installmentModel.generateForLoan({
+    loanId: id,
+    amount: approvedAmount,
+    tenor: approvedTenor,
+    startDate: new Date(),
+  });
+
   return true;
 };
 
@@ -28,3 +39,4 @@ export const rejectLoan = async (id, reviewerId, reason) => {
   await loanModel.updateStatus(id, 'REJECTED', reviewerId, null, null, reason);
   return true;
 };
+

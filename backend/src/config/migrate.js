@@ -250,6 +250,91 @@ export async function runMigrations() {
     `);
     await connection.query(`INSERT INTO _migrations (filename) VALUES ('013')`);
   }
+  
+    // 014 - pending_topups
+  if (!done.has('014')) {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS pending_topups (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        member_id INT NOT NULL,
+        order_id VARCHAR(50) UNIQUE NOT NULL,
+        amount DECIMAL(15,2) NOT NULL,
+        status ENUM('PENDING','SETTLED','FAILED','EXPIRED') DEFAULT 'PENDING',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+        INDEX idx_order (order_id), INDEX idx_member (member_id), INDEX idx_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('014')`);
+  }
+
+  // 015 - loan_installments
+  if (!done.has('015')) {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS loan_installments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        loan_id INT NOT NULL,
+        installment_number INT NOT NULL,
+        amount DECIMAL(15,2) NOT NULL,
+        due_date DATE NOT NULL,
+        status ENUM('PENDING','PAID') DEFAULT 'PENDING',
+        paid_at TIMESTAMP NULL,
+        transaction_id INT NULL COMMENT 'ledger transaction that paid this',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_loan_installment (loan_id, installment_number),
+        FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE,
+        INDEX idx_loan (loan_id), INDEX idx_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('015')`);
+  }
+
+   // 016 - pending_installment_payments
+  if (!done.has('016')) {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS pending_installment_payments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        member_id INT NOT NULL,
+        loan_id INT NOT NULL,
+        installment_id INT NOT NULL,
+        order_id VARCHAR(60) UNIQUE NOT NULL,
+        amount DECIMAL(15,2) NOT NULL,
+        status ENUM('PENDING','SETTLED','FAILED','EXPIRED') DEFAULT 'PENDING',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+        FOREIGN KEY (installment_id) REFERENCES loan_installments(id) ON DELETE CASCADE,
+        INDEX idx_order (order_id), INDEX idx_installment (installment_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('016')`);
+  }
+
+  // 017 - alter ai_recommendation ENUM to support PERLU_DIPERTIMBANGKAN
+  if (!done.has('017')) {
+    await connection.query(`
+      ALTER TABLE loans 
+      MODIFY COLUMN ai_recommendation ENUM('LAYAK', 'TIDAK_LAYAK', 'PERLU_DIPERTIMBANGKAN') NULL
+    `);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('017')`);
+  }
+
+  // 018 - add vehicle_type and property_type to members table
+  if (!done.has('018')) {
+    await addCol(connection, 'members', 'vehicle_type', `VARCHAR(50) NULL`);
+    await addCol(connection, 'members', 'property_type', `VARCHAR(50) NULL`);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('018')`);
+  }
+  
+  // 019 - add TRANSFER to transactions type ENUM
+  if (!done.has('019')) {
+    await connection.query(`
+      ALTER TABLE transactions 
+      MODIFY COLUMN type ENUM('SETORAN_WAJIB','TARIK_TUNAI','BAYAR_ANGSURAN','TOP_UP','PENARIKAN_SALDO','TRANSFER') NOT NULL
+    `);
+    await connection.query(`INSERT INTO _migrations (filename) VALUES ('019')`);
+  }
 
   await connection.end();
 }

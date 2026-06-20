@@ -107,26 +107,41 @@ export const calculateEligibilityScore = (probDefault) => {
     throw new InvalidMlProbabilityError(probDefault);
   }
 
-  // ── Skor 3 zona (konsisten dengan loanMlScoringService) ──────────
-  // ✅ LAYAK            (prob_default < 0.666)  → skor 75 — 100
-  // ⚠️  DIPERTIMBANGKAN (0.666 ≤ prob < 0.866) → skor 25 — 74
-  // ❌ TIDAK LAYAK      (prob_default ≥ 0.866)  → skor  0 — 24
+  // ── Skor 3 zona (konsisten dengan kriteria foto) ──────────
+  // ✅ LAYAK            (prob_default < 0.400)  → skor 75 — 100
+  // ⚠️  DIPERTIMBANGKAN (0.400 ≤ prob < 0.666) → skor 25 — 74
+  // ❌ TIDAK LAYAK      (prob_default ≥ 0.666)  → skor  0 — 24
   const probBerhasil = 1 - parsedProbDefault;
 
-  if (parsedProbDefault < 0.666) {
-    return Math.round(50 + probBerhasil * 50);
-  } else if (parsedProbDefault < 0.866) {
-    return Math.round(25 + probBerhasil * 25);
+  if (parsedProbDefault < 0.400) {
+    return Math.round(75 + ((probBerhasil - 0.6) / 0.4) * 25);
+  } else if (parsedProbDefault < 0.666) {
+    return Math.round(25 + ((probBerhasil - 0.335) / (0.6 - 0.335)) * 49);
   } else {
-    return Math.round(probBerhasil * 25);
+    return Math.round((probBerhasil / 0.334) * 24);
   }
 };
 
 export const mapPredictionToLoanAiAssessment = (prediction) => {
+  const prob_default = Number(prediction.prob_default);
+  let ai_recommendation;
+  let risk_level;
+
+  if (prob_default < 0.400) {
+    ai_recommendation = 'LAYAK';
+    risk_level = 'LOW';
+  } else if (prob_default < 0.666) {
+    ai_recommendation = 'PERLU_DIPERTIMBANGKAN';
+    risk_level = 'MEDIUM';
+  } else {
+    ai_recommendation = 'TIDAK_LAYAK';
+    risk_level = 'HIGH';
+  }
+
   return {
-    ai_recommendation: prediction.ai_recommendation,
-    risk_level: prediction.risk_level,
-    prob_default: Number(prediction.prob_default),
+    ai_recommendation,
+    risk_level,
+    prob_default,
     threshold: Number(prediction.threshold),
     confidence: Number(prediction.confidence),
     model_name: prediction.model_name,
@@ -134,7 +149,7 @@ export const mapPredictionToLoanAiAssessment = (prediction) => {
     human_review_required: prediction.human_review_required,
     final_decision: prediction.final_decision,
     note: prediction.note,
-    eligibility_score: calculateEligibilityScore(prediction.prob_default),
+    eligibility_score: calculateEligibilityScore(prob_default),
   };
 };
 

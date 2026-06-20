@@ -9,7 +9,15 @@ const Layout = () => {
   const navigate = useNavigate();
   const handleLogout = () => { logout(); navigate('/login'); };
   return (
-    <div className="flex h-screen bg-neutral-100"><Sidebar onLogout={handleLogout} /><div className="flex-1 flex flex-col overflow-hidden"><Navbar user={user} /><main className="flex-1 overflow-y-auto p-6"><Outlet /></main></div></div>
+    <div className="flex h-screen bg-neutral-100 p-4 gap-4 overflow-hidden">
+      <Sidebar onLogout={handleLogout} user={user} />
+      <div className="flex-1 flex flex-col rounded-[24px] bg-white border border-neutral-200/40 shadow-lg overflow-hidden h-full">
+        <Navbar user={user} />
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 };
 export default Layout;

@@ -97,7 +97,7 @@ export const getInflowOutflow = async (filters) => {
   let query = `
     SELECT 
       SUM(CASE WHEN t.type IN ('SETORAN_WAJIB', 'TOP_UP') THEN t.amount ELSE 0 END) as total_inflow,
-      SUM(CASE WHEN t.type IN ('TARIK_TUNAI', 'BAYAR_ANGSURAN', 'PENARIKAN_SALDO') THEN t.amount ELSE 0 END) as total_outflow
+      SUM(CASE WHEN t.type IN ('TARIK_TUNAI', 'BAYAR_ANGSURAN', 'PENARIKAN_SALDO', 'TRANSFER') THEN t.amount ELSE 0 END) as total_outflow
     FROM transactions t
     WHERE 1=1
   `;

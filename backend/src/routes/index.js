@@ -9,6 +9,7 @@ import dashboardRoutes from './v1/dashboardRoutes.js';
 import adminRoutes from './v1/adminRoutes.js';
 import publicRoutes from './v1/publicRoutes.js';
 import mobileRoutes from './v1/mobileRoutes.js';
+import paymentRoutes from './v1/paymentRoutes.js';
 
 const router = Router();
 router.use('/public', publicRoutes);
@@ -21,5 +22,6 @@ router.use('/loans', loanRoutes);
 router.use('/cashier', cashierRoutes);
 router.use('/ledger', ledgerRoutes);
 router.use('/mobile', mobileRoutes);
+router.use('/payments', paymentRoutes);
 
 export default router;
