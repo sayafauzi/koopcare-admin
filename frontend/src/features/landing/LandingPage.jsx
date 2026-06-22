@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
-import { 
-  UserGroupIcon, 
-  WalletIcon, 
-  DocumentTextIcon, 
-  Bars3Icon, 
+import {
+  UserGroupIcon,
+  WalletIcon,
+  DocumentTextIcon,
+  Bars3Icon,
   XMarkIcon,
   BanknotesIcon,
   ArrowRightIcon,
   ShieldCheckIcon,
   ChartBarIcon,
   IdentificationIcon,
-  PresentationChartLineIcon
+  PresentationChartLineIcon,
+  ArrowDownTrayIcon,
+  DevicePhoneMobileIcon,
+  CheckBadgeIcon
 } from '@heroicons/react/24/outline';
 import heroImage from '../../assets/koopcare_hero.png';
+
+// Ganti URL ini dengan link APK yang sebenarnya saat tersedia
+const APK_DOWNLOAD_URL = 'https://www.mediafire.com/file/5w7nfp2cinde8vm/koopcare.apk/file';
+const APK_VERSION = '1.0.0';
+const APK_SIZE = '18.4 MB';
 
 const LandingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -40,11 +48,11 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-neutral-800 font-body relative select-none">
-      
+
       {/* Header/Navbar */}
       <header className="sticky top-0 z-50 bg-white/75 backdrop-blur-md border-b border-neutral-100/80">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
-          
+
           {/* Logo Section */}
           <div className="flex items-center gap-3">
             <img
@@ -63,6 +71,7 @@ const LandingPage = () => {
             <a href="#beranda" className="hover:text-[#386518] transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-[2px] after:bg-[#386518] hover:after:w-full after:transition-all">Beranda</a>
             <a href="#fitur" className="hover:text-[#386518] transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-[2px] after:bg-[#386518] hover:after:w-full after:transition-all">Fitur</a>
             <a href="#tentang" className="hover:text-[#386518] transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-[2px] after:bg-[#386518] hover:after:w-full after:transition-all">Tentang</a>
+            <a href="#download" className="hover:text-[#386518] transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-[2px] after:bg-[#386518] hover:after:w-full after:transition-all">Download APK</a>
           </nav>
 
           {/* Call to Action Button */}
@@ -98,13 +107,13 @@ const LandingPage = () => {
                   <>
                     {/* Backdrop to close dropdown on outer click */}
                     <div className="fixed inset-0 z-30" onClick={() => setProfileDropdownOpen(false)} />
-                    
+
                     <div className="absolute right-0 top-12 w-52 bg-white rounded-2xl border border-neutral-200/80 shadow-xl py-2 z-40 animate-scaleIn">
                       <div className="px-4 py-2 border-b border-neutral-100">
                         <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Akun Koperasi</p>
                         <p className="text-xs font-bold text-neutral-800 truncate mt-0.5">{user?.name || user?.full_name || 'Anggota KoopCare'}</p>
                       </div>
-                      
+
                       <Link
                         to="/dashboard"
                         onClick={() => setProfileDropdownOpen(false)}
@@ -113,9 +122,9 @@ const LandingPage = () => {
                         <ChartBarIcon className="w-4 h-4" />
                         Portal Dashboard
                       </Link>
-                      
+
                       <div className="border-t border-neutral-100 my-1" />
-                      
+
                       <button
                         onClick={() => {
                           setProfileDropdownOpen(false);
@@ -177,7 +186,17 @@ const LandingPage = () => {
           >
             Tentang
           </a>
-          
+          <a
+            href={APK_DOWNLOAD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="border-b border-neutral-100 pb-3 text-[#386518] flex items-center gap-2"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+            Download APK
+          </a>
+
           <div className="mt-4 border-t border-neutral-100 pt-6">
             {isAuthenticated ? (
               <div className="space-y-4">
@@ -228,10 +247,10 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section id="beranda" className="max-w-7xl mx-auto px-6 lg:px-12 pt-10 pb-20 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Hero Left Column */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
-            
+
             {/* Soft Gray Badge matching the PLN style perfectly */}
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-neutral-100 border border-neutral-200/60 text-neutral-500 font-semibold text-xs mb-8">
               <span className="w-2 h-2 rounded-full bg-[#EDBF5D]" />
@@ -268,6 +287,16 @@ const LandingPage = () => {
                 </Link>
               )}
 
+              <a
+                href={APK_DOWNLOAD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-heading font-bold text-xs bg-[#EDBF5D] text-[#386518] hover:bg-[#e5b34a] transition-all shadow-md shadow-[#EDBF5D]/30 hover:shadow-lg hover:-translate-y-[1px]"
+              >
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                Download APK
+              </a>
+
               <button
                 onClick={() => setShowSummaryModal(true)}
                 className="flex-1 sm:flex-initial px-8 py-3.5 rounded-xl font-heading font-bold text-xs bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50 hover:text-neutral-950 transition-all hover:-translate-y-[1px]"
@@ -278,7 +307,7 @@ const LandingPage = () => {
 
             {/* 3 Floating docked card links matching reference layout */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
-              
+
               {/* Card 1 */}
               <div className="bg-neutral-50 hover:bg-white p-4.5 rounded-2xl border border-neutral-200/60 shadow-sm hover:shadow-md hover:border-[#386518]/45 transition-all flex items-center gap-3.5 cursor-pointer">
                 <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 flex-shrink-0">
@@ -318,12 +347,12 @@ const LandingPage = () => {
 
           {/* Hero Right Column (Premium Vector Illustration) */}
           <div className="lg:col-span-5 w-full flex justify-center items-center relative select-none">
-            
+
             {/* Visual gradient backdrop mimicking the lightning glow frame */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-gradient-to-br from-emerald-100/40 via-amber-100/10 to-transparent blur-3xl pointer-events-none rounded-full z-0" />
-            
+
             <div className="relative w-full max-w-md lg:max-w-none aspect-[1.15/1] flex justify-center items-center bg-white rounded-3xl p-4 shadow-xl border border-neutral-100 z-10 hover:shadow-2xl transition-all duration-300">
-              
+
               <img
                 src={heroImage}
                 alt="KoopCare Modern Cooperative Building"
@@ -351,7 +380,7 @@ const LandingPage = () => {
       {/* Feature Section */}
       <section id="fitur" className="bg-neutral-50/50 py-20 border-t border-neutral-100/80">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          
+
           <div className="max-w-2xl mx-auto text-center mb-16">
             <h3 className="text-[#386518] text-xs font-bold uppercase tracking-widest mb-3">Keunggulan Utama</h3>
             <h2 className="text-3xl font-extrabold text-neutral-900 tracking-tight font-heading">
@@ -363,7 +392,7 @@ const LandingPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             {/* Feature card 1 */}
             <div className="p-8 rounded-3xl bg-white border border-neutral-200/60 shadow-sm hover:shadow-md hover:border-[#386518]/30 transition-all flex flex-col items-start text-left">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
@@ -402,6 +431,163 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Download APK Section */}
+      <section id="download" className="py-24 relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#386518] via-[#2e5c14] to-[#1a3a08]" />
+        {/* Subtle dot pattern overlay using style prop to avoid JSX/esbuild parse issues */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `radial-gradient(circle, #ffffff 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        {/* Decorative blobs */}
+        <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[#EDBF5D]/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-5%] w-[300px] h-[300px] rounded-full bg-emerald-300/10 blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left: Copy */}
+            <div className="text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EDBF5D]/20 border border-[#EDBF5D]/30 text-[#EDBF5D] font-bold text-[10px] uppercase tracking-widest mb-6">
+                <DevicePhoneMobileIcon className="w-3.5 h-3.5" />
+                Aplikasi Mobile KoopCare
+              </div>
+
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight font-heading mb-5 leading-tight">
+                Download Aplikasi KoopCare
+                <span className="block text-[#EDBF5D] mt-1">Langsung di Genggamanmu</span>
+              </h2>
+
+              <p className="text-white/70 text-sm md:text-base font-medium leading-relaxed mb-8">
+                Akses seluruh layanan koperasi kapan saja dan di mana saja. Daftarkan identitas, ajukan pinjaman, dan pantau riwayat transaksi melalui aplikasi mobile KoopCare yang aman dan intuitif.
+              </p>
+
+              {/* Feature list */}
+              <div className="space-y-3 mb-10">
+                {[
+                  'Registrasi & KYC digital dengan foto selfie',
+                  'Pengajuan pinjaman berbasis skor AI',
+                  'Notifikasi real-time status pembiayaan',
+                  'Riwayat transaksi & laporan simpanan',
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <CheckBadgeIcon className="w-5 h-5 text-[#EDBF5D] flex-shrink-0" />
+                    <span className="text-white/80 text-sm font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Download Button */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href={APK_DOWNLOAD_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-heading font-bold text-sm bg-[#EDBF5D] text-[#1a3a08] hover:bg-[#f5c842] transition-all shadow-lg shadow-[#EDBF5D]/20 hover:shadow-xl hover:shadow-[#EDBF5D]/30 hover:-translate-y-[2px]"
+                >
+                  <ArrowDownTrayIcon className="w-5 h-5 group-hover:animate-bounce" />
+                  Download APK Android
+                </a>
+                <div className="inline-flex items-center gap-2 px-5 py-4 rounded-2xl border border-white/15 text-white/60 text-xs font-semibold">
+                  <DevicePhoneMobileIcon className="w-4 h-4" />
+                  Versi {APK_VERSION} &bull; {APK_SIZE}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Phone mockup card */}
+            <div className="flex justify-center items-center">
+              <div className="relative">
+                {/* Outer glow */}
+                <div className="absolute inset-0 bg-[#EDBF5D]/20 blur-3xl rounded-full scale-110" />
+
+                {/* Phone frame */}
+                <div className="relative w-56 h-[440px] rounded-[3rem] bg-neutral-900 border-[6px] border-neutral-700 shadow-2xl shadow-black/50 overflow-hidden">
+                  {/* Screen content */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#386518] to-[#1a3a08] flex flex-col">
+                    {/* Status bar */}
+                    <div className="flex justify-between items-center px-5 pt-4 pb-2">
+                      <span className="text-white/60 text-[9px] font-bold">9:41</span>
+                      <div className="flex gap-1">
+                        <div className="w-3 h-1.5 rounded-sm bg-white/60" />
+                        <div className="w-1 h-1.5 rounded-sm bg-white/40" />
+                      </div>
+                    </div>
+
+                    {/* App header */}
+                    <div className="flex items-center gap-2 px-5 py-3">
+                      <div className="w-7 h-7 rounded-full bg-[#EDBF5D] flex items-center justify-center">
+                        <span className="text-[#386518] font-extrabold text-[10px]">K</span>
+                      </div>
+                      <div>
+                        <p className="text-white text-[10px] font-bold leading-none">KoopCare</p>
+                        <p className="text-white/50 text-[8px] mt-0.5">Portal Koperasi</p>
+                      </div>
+                    </div>
+
+                    {/* Mock dashboard */}
+                    <div className="flex-1 bg-white/5 mx-3 mb-3 rounded-2xl p-4 space-y-3">
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <p className="text-white/50 text-[8px] uppercase tracking-wider">Total Simpanan</p>
+                        <p className="text-white font-extrabold text-base mt-0.5">Rp 4.820.000</p>
+                        <div className="w-full h-1 bg-white/10 rounded-full mt-2">
+                          <div className="h-1 bg-[#EDBF5D] rounded-full" style={{ width: '68%' }} />
+                        </div>
+                      </div>
+                      {[['Status KYC', 'Terverifikasi ✓', 'text-emerald-400'], ['Pinjaman', 'Rp 2.000.000', 'text-white'], ['Tenor', '12 Bulan', 'text-white']].map(([label, val, cls], i) => (
+                        <div key={i} className="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2">
+                          <span className="text-white/50 text-[8px] font-semibold">{label}</span>
+                          <span className={`text-[9px] font-bold ${cls}`}>{val}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bottom nav */}
+                    <div className="flex justify-around items-center bg-black/20 px-4 py-3">
+                      {['🏠', '📊', '💳', '👤'].map((icon, i) => (
+                        <div key={i} className={`flex flex-col items-center gap-0.5 ${i === 0 ? 'opacity-100' : 'opacity-40'}`}>
+                          <span className="text-sm">{icon}</span>
+                          <div className={`w-1 h-1 rounded-full ${i === 0 ? 'bg-[#EDBF5D]' : 'bg-transparent'}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-900 rounded-b-2xl" />
+                </div>
+
+                {/* Floating badges */}
+                <div className="absolute -right-8 top-16 bg-white rounded-2xl px-3 py-2 shadow-xl flex items-center gap-2">
+                  {/* Solid star SVG — outline icons can't be filled via Tailwind */}
+                  <svg className="w-4 h-4" viewBox="0 0 20 20" fill="#EDBF5D" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <div>
+                    <p className="text-[9px] font-bold text-neutral-800">Rating</p>
+                    <p className="text-[11px] font-extrabold text-[#386518]">4.9 / 5.0</p>
+                  </div>
+                </div>
+
+                <div className="absolute -left-10 bottom-24 bg-white rounded-2xl px-3 py-2 shadow-xl flex items-center gap-2">
+                  <ArrowDownTrayIcon className="w-4 h-4 text-[#386518]" />
+                  <div>
+                    <p className="text-[9px] font-bold text-neutral-800">Unduhan</p>
+                    <p className="text-[11px] font-extrabold text-[#386518]">10K+</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Tentang Kami (About Us) Section */}
       <section id="tentang" className="bg-white py-20 border-t border-neutral-100/80 relative overflow-hidden">
         {/* Decorative background glow contained inside this section */}
@@ -409,7 +595,7 @@ const LandingPage = () => {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            
+
             {/* Left Column: Mission Narrative & Goals */}
             <div className="lg:col-span-6 text-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-[#386518] font-bold text-[10px] uppercase tracking-widest mb-4">
@@ -444,7 +630,7 @@ const LandingPage = () => {
 
             {/* Right Column: Dynamic Core Value Cards */}
             <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
+
               {/* Value card 1: Amanah */}
               <div className="p-6 rounded-2xl bg-neutral-50 border border-neutral-200/60 shadow-sm hover:shadow-md hover:border-[#386518]/30 transition-all text-left">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
@@ -505,6 +691,15 @@ const LandingPage = () => {
             <a href="#beranda" className="hover:text-white transition-colors">Beranda</a>
             <a href="#fitur" className="hover:text-white transition-colors">Fitur</a>
             <a href="#tentang" className="hover:text-white transition-colors">Tentang</a>
+            <a
+              href={APK_DOWNLOAD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[#EDBF5D] hover:text-[#f5c842] transition-colors"
+            >
+              <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+              Download APK
+            </a>
           </div>
         </div>
       </footer>
@@ -513,7 +708,7 @@ const LandingPage = () => {
       {showSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl shadow-2xl border border-neutral-200/80 w-full max-w-2xl overflow-hidden animate-scaleIn">
-            
+
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#386518] to-[#43a047] p-6 text-white flex justify-between items-center">
               <div>
@@ -530,9 +725,9 @@ const LandingPage = () => {
 
             {/* Modal Body */}
             <div className="p-6 md:p-8 space-y-6">
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
+
                 {/* Stat block 1 */}
                 <div className="bg-neutral-50 rounded-2xl border border-neutral-100 p-5 flex items-center justify-between">
                   <div>
@@ -597,7 +792,7 @@ const LandingPage = () => {
               >
                 Tutup
               </button>
-              
+
               <Link
                 to="/login"
                 onClick={() => setShowSummaryModal(false)}
